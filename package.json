@@ -1,0 +1,197 @@
+{
+  "name": "routecase",
+  "displayName": "RouteCase — API Route & Endpoint Tester",
+  "description": "Define API endpoints once and run multiple input cases against them directly inside VS Code.",
+  "version": "0.1.0",
+  "publisher": "routecase",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/routecase/routecase.git"
+  },
+  "icon": "resources/icon.png",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Testing",
+    "Other"
+  ],
+  "keywords": [
+    "api",
+    "rest",
+    "testing",
+    "endpoint",
+    "http",
+    "test-runner",
+    "postman",
+    "routecase"
+  ],
+  "main": "./out/src/extension.js",
+  "activationEvents": [
+    "onLanguage:routecase",
+    "workspaceContains:**/*.rcase",
+    "workspaceContains:**/*.routecase"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "routecase",
+        "aliases": [
+          "RouteCase",
+          "routecase"
+        ],
+        "extensions": [
+          ".rcase",
+          ".routecase"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "*.rcase",
+          "*.routecase",
+          "*.rcase.json"
+        ],
+        "url": "./schemas/rcase.schema.json"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "routecase-explorer",
+          "title": "RouteCase",
+          "icon": "resources/activity-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "routecase-explorer": [
+        {
+          "id": "routecase.resultsView",
+          "name": "Test Results",
+          "type": "tree"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "routecase.runAll",
+        "title": "Run All Tests",
+        "category": "RouteCase",
+        "icon": "$(play)"
+      },
+      {
+        "command": "routecase.runCurrentFile",
+        "title": "Run Tests in Current File",
+        "category": "RouteCase",
+        "icon": "$(play-circle)"
+      },
+      {
+        "command": "routecase.stopRun",
+        "title": "Stop Test Run",
+        "category": "RouteCase",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "routecase.validateCurrentFile",
+        "title": "Validate Current File",
+        "category": "RouteCase",
+        "icon": "$(check)"
+      },
+      {
+        "command": "routecase.createExample",
+        "title": "Create Example Test File",
+        "category": "RouteCase",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "routecase.openResultsPanel",
+        "title": "Open Results Panel",
+        "category": "RouteCase",
+        "icon": "$(output)"
+      },
+      {
+        "command": "routecase.rerunCase",
+        "title": "Rerun Test Case",
+        "category": "RouteCase",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "routecase.runCurrentFile",
+          "when": "resourceExtname == .rcase || resourceExtname == .routecase",
+          "group": "navigation@1"
+        },
+        {
+          "command": "routecase.openResultsPanel",
+          "when": "resourceExtname == .rcase || resourceExtname == .routecase",
+          "group": "navigation@2"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "routecase.runCurrentFile",
+          "when": "view == routecase.resultsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "routecase.stopRun",
+          "when": "view == routecase.resultsView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "routecase.openResultsPanel",
+          "when": "view == routecase.resultsView",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "routecase.rerunCase",
+          "when": "view == routecase.resultsView && viewItem == testCase",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "RouteCase",
+      "properties": {
+        "routecase.requestTimeout": {
+          "type": "number",
+          "default": 10000,
+          "description": "Timeout in milliseconds for each HTTP request."
+        },
+        "routecase.maxResponseSize": {
+          "type": "number",
+          "default": 5242880,
+          "description": "Maximum response body size in bytes to read and parse (default 5MB)."
+        },
+        "routecase.followRedirects": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to automatically follow HTTP redirects (false by default for safety)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "tsc -p ./ && node --test out/tests/unit/**/*.test.js out/tests/integration/**/*.test.js",
+    "test:unit": "tsc -p ./ && node --test out/tests/unit/**/*.test.js",
+    "test:integration": "tsc -p ./ && node --test out/tests/integration/**/*.test.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^2.30.0",
+    "typescript": "^5.4.5"
+  }
+}

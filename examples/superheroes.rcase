@@ -1,0 +1,53 @@
+{
+  "$schema": "../schemas/rcase.schema.json",
+  "name": "Superhero API Test Suite",
+  "baseUrl": "http://localhost:3000",
+  "tests": [
+    {
+      "name": "Get superhero by name",
+      "method": "GET",
+      "path": "/api/info/{name}",
+      "success": [
+        {
+          "name": "Find Batman",
+          "params": {
+            "name": "Batman"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "Batman"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Unknown superhero",
+          "params": {
+            "name": "UnknownHero123"
+          },
+          "expect": {
+            "status": 404
+          }
+        },
+        {
+          "name": "Invalid name rat",
+          "params": {
+            "name": "rat"
+          },
+          "expect": {
+            "status": 404
+          }
+        },
+        {
+          "name": "Invalid name king",
+          "params": {
+            "name": "king"
+          },
+          "expect": {
+            "status": 404
+          }
+        }
+      ]
+    }
+  ]
+}

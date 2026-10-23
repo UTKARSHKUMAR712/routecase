@@ -1,0 +1,90 @@
+{
+  "$schema": "../schemas/rcase.schema.json",
+  "name": "Comprehensive Error Handling & Edge Cases",
+  "baseUrl": "http://localhost:8080",
+  "tests": [
+    {
+      "name": "Lookup item with strict numeric identifier",
+      "method": "GET",
+      "path": "/api/v2/items/{itemId}",
+      "success": [
+        {
+          "name": "Valid positive integer ID",
+          "params": {
+            "itemId": 1042
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "\"id\":1042"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Reject non-numeric string identifier",
+          "params": {
+            "itemId": "abc-invalid"
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "itemId must be a positive integer"
+          }
+        },
+        {
+          "name": "Reject negative ID",
+          "params": {
+            "itemId": -5
+          },
+          "expect": {
+            "status": 400
+          }
+        },
+        {
+          "name": "Item not found in database",
+          "params": {
+            "itemId": 999999
+          },
+          "expect": {
+            "status": 404,
+            "bodyContains": "Item not found"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Access protected admin statistics",
+      "method": "GET",
+      "path": "/api/v2/admin/stats",
+      "success": [
+        {
+          "name": "Superadmin authorized access",
+          "headers": {
+            "X-Admin-Key": "valid-superadmin-secret-key"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "system_uptime"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Missing admin key header",
+          "expect": {
+            "status": 401
+          }
+        },
+        {
+          "name": "Forbidden insufficient permissions",
+          "headers": {
+            "X-Admin-Key": "read-only-guest-key"
+          },
+          "expect": {
+            "status": 403,
+            "bodyContains": "Access denied"
+          }
+        }
+      ]
+    }
+  ]
+}

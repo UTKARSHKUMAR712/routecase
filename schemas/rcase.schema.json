@@ -1,0 +1,152 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RouteCase API Test Definition",
+  "description": "Schema for RouteCase (.rcase) API endpoint test definitions",
+  "type": "object",
+  "required": ["baseUrl", "tests"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional schema reference"
+    },
+    "name": {
+      "type": "string",
+      "description": "Optional name for this test suite file"
+    },
+    "baseUrl": {
+      "type": "string",
+      "description": "Base URL of the API server (e.g. http://localhost:3000)",
+      "format": "uri"
+    },
+    "headers": {
+      "type": "object",
+      "description": "Common HTTP headers sent with all requests",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "tests": {
+      "type": "array",
+      "description": "List of API endpoints and their associated test cases",
+      "items": {
+        "$ref": "#/definitions/EndpointDefinition"
+      }
+    }
+  },
+  "definitions": {
+    "EndpointDefinition": {
+      "type": "object",
+      "required": ["name", "method", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Descriptive name for this endpoint"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+          "description": "HTTP request method"
+        },
+        "path": {
+          "type": "string",
+          "description": "URL path template with placeholders, e.g. /api/info/{name}"
+        },
+        "headers": {
+          "type": "object",
+          "description": "Endpoint-specific HTTP headers",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "success": {
+          "type": "array",
+          "description": "Test cases expected to return a successful response",
+          "items": {
+            "$ref": "#/definitions/TestCase"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "description": "Test cases expected to return a client/server error response",
+          "items": {
+            "$ref": "#/definitions/TestCase"
+          }
+        }
+      }
+    },
+    "TestCase": {
+      "type": "object",
+      "required": ["name", "expect"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Descriptive name for this individual test case"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional details about this test scenario"
+        },
+        "params": {
+          "type": "object",
+          "description": "Substitutions for path template variables, e.g. { \"name\": \"Batman\" }",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          }
+        },
+        "query": {
+          "type": "object",
+          "description": "Query string parameters appended to the URL",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          }
+        },
+        "headers": {
+          "type": "object",
+          "description": "Case-specific request headers",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "body": {
+          "description": "Request body for POST/PUT/PATCH requests (JSON object, array, or string)",
+          "type": ["object", "array", "string", "number", "boolean", "null"]
+        },
+        "expect": {
+          "type": "object",
+          "required": ["status"],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 599,
+              "description": "Expected HTTP response status code (e.g. 200, 404)"
+            },
+            "bodyContains": {
+              "type": "string",
+              "description": "Substring that must be present in the response body"
+            },
+            "bodyEquals": {
+              "description": "Exact JSON or text value that the response body must equal"
+            },
+            "headers": {
+              "type": "object",
+              "description": "Expected headers that must be present in the response",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "maxDurationMs": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum allowed response time in milliseconds"
+            }
+          }
+        }
+      }
+    }
+  }
+}

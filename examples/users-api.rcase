@@ -1,0 +1,134 @@
+{
+  "$schema": "../schemas/rcase.schema.json",
+  "name": "Users & Authentication API Test Suite",
+  "baseUrl": "https://api.example.com",
+  "headers": {
+    "Accept": "application/json"
+  },
+  "tests": [
+    {
+      "name": "Create new user account",
+      "method": "POST",
+      "path": "/api/v1/users",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "success": [
+        {
+          "name": "Register valid developer user",
+          "body": {
+            "username": "batman_dev",
+            "email": "bruce@wayne.enterprise",
+            "role": "developer"
+          },
+          "expect": {
+            "status": 201,
+            "bodyContains": "batman_dev",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "maxDurationMs": 2000
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Reject duplicate email registration",
+          "body": {
+            "username": "imposter",
+            "email": "bruce@wayne.enterprise"
+          },
+          "expect": {
+            "status": 409,
+            "bodyContains": "Email already in use"
+          }
+        },
+        {
+          "name": "Reject missing required username field",
+          "body": {
+            "email": "anonymous@wayne.enterprise"
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "username is required"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Query and filter active users",
+      "method": "GET",
+      "path": "/api/v1/users",
+      "success": [
+        {
+          "name": "Fetch page 1 of active developers",
+          "query": {
+            "role": "developer",
+            "status": "active",
+            "limit": 10,
+            "page": 1
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "batman_dev",
+            "maxDurationMs": 1500
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Reject invalid pagination limit exceeding maximum",
+          "query": {
+            "limit": 5000
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "Limit must not exceed 100"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete user by ID",
+      "method": "DELETE",
+      "path": "/api/v1/users/{userId}",
+      "headers": {
+        "Authorization": "Bearer sample-jwt-token"
+      },
+      "success": [
+        {
+          "name": "Successfully remove deactivated test account",
+          "params": {
+            "userId": "9999"
+          },
+          "expect": {
+            "status": 204
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Prevent unauthorized deletion without valid bearer token",
+          "params": {
+            "userId": "1"
+          },
+          "headers": {
+            "Authorization": "Bearer invalid-expired-token"
+          },
+          "expect": {
+            "status": 401
+          }
+        },
+        {
+          "name": "Return 404 when attempting to delete non-existent user",
+          "params": {
+            "userId": "non-existent-uuid"
+          },
+          "expect": {
+            "status": 404
+          }
+        }
+      ]
+    }
+  ]
+}
