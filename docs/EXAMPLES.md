@@ -10,7 +10,7 @@ This matches the core specification: one endpoint with multiple parameters expan
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/routecase/routecase/main/schemas/rcase.schema.json",
+  "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
   "name": "Superhero API Test Suite",
   "baseUrl": "http://localhost:3000",
   "tests": [
@@ -72,7 +72,7 @@ Testing user creation with JSON request body, validation errors, duplicate check
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/routecase/routecase/main/schemas/rcase.schema.json",
+  "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
   "name": "User Management CRUD API",
   "baseUrl": "https://api.myapp.com",
   "headers": {
@@ -206,7 +206,7 @@ Testing role-based access control, API keys, and custom headers:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/routecase/routecase/main/schemas/rcase.schema.json",
+  "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
   "name": "Role-Based Access Control Checks",
   "baseUrl": "http://localhost:8080",
   "tests": [

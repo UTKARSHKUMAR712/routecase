@@ -34,7 +34,7 @@ Paste this minimal test suite:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/routecase/routecase/main/schemas/rcase.schema.json",
+  "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
   "name": "My First API Test",
   "baseUrl": "http://localhost:3000",
   "tests": [

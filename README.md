@@ -29,7 +29,7 @@ Create a file named `superheroes.rcase` (or run command `RouteCase: Create Examp
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/routecase/routecase/main/schemas/rcase.schema.json",
+  "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
   "name": "Superhero API Test Suite",
   "baseUrl": "http://localhost:3000",
   "tests": [

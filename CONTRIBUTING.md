@@ -6,7 +6,7 @@ Thank you for your interest in contributing to **RouteCase**!
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/routecase/routecase.git
+   git clone https://github.com/UTKARSHKUMAR712/routecase.git
    cd routecase
    ```
 
