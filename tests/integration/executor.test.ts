@@ -25,6 +25,22 @@ describe('RouteCase Execution Engine Integration Tests', () => {
         return;
       }
 
+      if (url.pathname === '/api/search') {
+        const name = url.searchParams.get('name');
+        const gender = url.searchParams.get('gender');
+        const publisher = url.searchParams.get('publisher');
+
+        if (name === 'A-Bomb' && gender === 'Male' && publisher === 'Marvel Comics') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ found: true, name, gender, publisher }));
+          return;
+        }
+
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Missing or invalid search params' }));
+        return;
+      }
+
       if (url.pathname === '/slow') {
         // Delay response to test timeout
         setTimeout(() => {
@@ -65,6 +81,44 @@ describe('RouteCase Execution Engine Integration Tests', () => {
 
   after(async () => {
     await new Promise<void>(resolve => server.close(() => resolve()));
+  });
+
+  it('Regression Test: should correctly route query parameters in path template without %3F in route path', async () => {
+    const doc: RCaseDocument = {
+      baseUrl,
+      tests: [
+        {
+          name: 'Search superheroes',
+          method: 'GET',
+          path: '/api/search?name={name}&gender={gender}&publisher={publisher}',
+          success: [
+            {
+              name: 'Find A-Bomb',
+              params: {
+                name: 'A-Bomb',
+                gender: 'Male',
+                publisher: 'Marvel Comics'
+              },
+              expect: {
+                status: 200,
+                bodyContains: 'Marvel Comics'
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    const executor = new TestExecutor();
+    const suiteResult = await executor.executeSuite(doc, 'search.rcase');
+    assert.equal(suiteResult.totalCount, 1);
+    assert.equal(suiteResult.passedCount, 1);
+    assert.equal(suiteResult.results[0].status, 'PASS');
+    assert.equal(suiteResult.results[0].actualStatus, 200);
+    assert.equal(
+      suiteResult.results[0].url,
+      `${baseUrl}/api/search?name=A-Bomb&gender=Male&publisher=Marvel%20Comics`
+    );
   });
 
   it('should run full superhero suite (1 success, 3 errors) producing 4 independent results', async () => {

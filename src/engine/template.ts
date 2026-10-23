@@ -54,14 +54,28 @@ export function buildUrl(
     };
   }
 
-  // Substitute each placeholder with safely URL-encoded value
-  let expandedPath = pathTemplate.replace(PLACEHOLDER_REGEX, (_match, key: string) => {
+  // Split path template into pathname and query string parts at the first '?'
+  const qIndex = pathTemplate.indexOf('?');
+  const pathPart = qIndex !== -1 ? pathTemplate.slice(0, qIndex) : pathTemplate;
+  const templateQueryPart = qIndex !== -1 ? pathTemplate.slice(qIndex + 1) : '';
+
+  // Substitute each placeholder in pathPart with safely URL-encoded value
+  const expandedPathPart = pathPart.replace(PLACEHOLDER_REGEX, (_match, key: string) => {
     const rawVal = providedParams[key];
     return encodeURIComponent(String(rawVal));
   });
 
-  // Verify no remaining unresolved braces
-  const remainingMatches = extractPlaceholders(expandedPath);
+  // Substitute each placeholder in templateQueryPart with safely URL-encoded value
+  const expandedTemplateQuery = templateQueryPart.replace(PLACEHOLDER_REGEX, (_match, key: string) => {
+    const rawVal = providedParams[key];
+    return encodeURIComponent(String(rawVal));
+  });
+
+  // Verify no remaining unresolved braces in either part
+  const remainingMatches = [
+    ...extractPlaceholders(expandedPathPart),
+    ...extractPlaceholders(expandedTemplateQuery)
+  ];
   if (remainingMatches.length > 0) {
     return {
       success: false,
@@ -70,15 +84,15 @@ export function buildUrl(
     };
   }
 
-  // Combine baseUrl path and expandedPath safely
+  // Combine baseUrl path and expandedPathPart safely without query string
   let combinedPathname: string;
   const basePath = parsedBase.pathname.replace(/\/+$/, '');
-  const cleanExpanded = expandedPath.replace(/^\/+/, '');
+  const cleanPath = expandedPathPart.replace(/^\/+/, '');
 
-  if (basePath && cleanExpanded) {
-    combinedPathname = `${basePath}/${cleanExpanded}`;
-  } else if (cleanExpanded) {
-    combinedPathname = `/${cleanExpanded}`;
+  if (basePath && cleanPath) {
+    combinedPathname = `${basePath}/${cleanPath}`;
+  } else if (cleanPath) {
+    combinedPathname = `/${cleanPath}`;
   } else if (basePath) {
     combinedPathname = basePath;
   } else {
@@ -87,13 +101,27 @@ export function buildUrl(
 
   parsedBase.pathname = combinedPathname;
 
-  // Append query parameters if provided
+  // Assemble query string parts
+  const queryParts: string[] = [];
+  const existingBaseSearch = parsedBase.search.replace(/^\?/, '');
+  if (existingBaseSearch) {
+    queryParts.push(existingBaseSearch);
+  }
+  if (expandedTemplateQuery) {
+    queryParts.push(expandedTemplateQuery);
+  }
   if (query) {
     for (const [key, val] of Object.entries(query)) {
       if (val !== undefined && val !== null) {
-        parsedBase.searchParams.append(key, String(val));
+        queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(val))}`);
       }
     }
+  }
+
+  if (queryParts.length > 0) {
+    parsedBase.search = queryParts.join('&');
+  } else {
+    parsedBase.search = '';
   }
 
   return {
