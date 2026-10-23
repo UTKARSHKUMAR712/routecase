@@ -5,16 +5,29 @@ import { parseRCase } from './parser/parser';
 import { TestExecutor } from './engine/executor';
 import { RouteCaseTreeProvider } from './providers/resultsTreeProvider';
 import { RouteCaseResultsPanel } from './webview/resultsPanel';
-import { TestSuiteResult } from './models/types';
+import { RouteCaseCodeLensProvider } from './providers/codeLensProvider';
+import { TestSuiteResult, ExecutionFilter } from './models/types';
 
 let currentExecutor: TestExecutor | undefined;
 let statusBarItem: vscode.StatusBarItem;
 let treeProvider: RouteCaseTreeProvider;
+let codeLensProvider: RouteCaseCodeLensProvider;
 let lastSuiteResult: TestSuiteResult | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
   treeProvider = new RouteCaseTreeProvider();
   vscode.window.registerTreeDataProvider('routecase.resultsView', treeProvider);
+
+  codeLensProvider = new RouteCaseCodeLensProvider();
+  const codeLensDisposable = vscode.languages.registerCodeLensProvider(
+    [
+      { scheme: 'file', language: 'routecase' },
+      { scheme: 'file', pattern: '**/*.rcase' },
+      { scheme: 'file', pattern: '**/*.routecase' }
+    ],
+    codeLensProvider
+  );
+  context.subscriptions.push(codeLensDisposable);
 
   // Status Bar item
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);
@@ -24,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
   statusBarItem.show();
   context.subscriptions.push(statusBarItem);
 
-  // 1. Run Tests in Current File
+  // 1. Run Tests in Current File (All cases)
   const runCurrentFileCmd = vscode.commands.registerCommand('routecase.runCurrentFile', async (uri?: vscode.Uri) => {
     const targetUri = uri || getActiveRCaseUri();
     if (!targetUri) {
@@ -34,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
     await executeFile(targetUri, context);
   });
 
-  // 2. Run All Tests
+  // 2. Run All Tests across workspace
   const runAllCmd = vscode.commands.registerCommand('routecase.runAll', async () => {
     const files = await vscode.workspace.findFiles('**/*.{rcase,routecase}');
     if (files.length === 0) {
@@ -46,7 +59,23 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  // 3. Stop Test Run
+  // 3. Run Single Test Case (Jupyter notebook style)
+  const runSingleCaseCmd = vscode.commands.registerCommand(
+    'routecase.runSingleCase',
+    async (uri: vscode.Uri, endpointName: string, caseName: string) => {
+      await executeFile(uri, context, { endpointName, caseName });
+    }
+  );
+
+  // 4. Run Single Endpoint (All cases under that endpoint)
+  const runEndpointCmd = vscode.commands.registerCommand(
+    'routecase.runEndpoint',
+    async (uri: vscode.Uri, endpointName: string) => {
+      await executeFile(uri, context, { endpointName });
+    }
+  );
+
+  // 5. Stop Test Run
   const stopRunCmd = vscode.commands.registerCommand('routecase.stopRun', () => {
     if (currentExecutor) {
       currentExecutor.cancel();
@@ -57,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  // 4. Validate Current File
+  // 6. Validate Current File
   const validateCmd = vscode.commands.registerCommand('routecase.validateCurrentFile', async (uri?: vscode.Uri) => {
     const targetUri = uri || getActiveRCaseUri();
     if (!targetUri) {
@@ -79,7 +108,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  // 5. Create Example Test File
+  // 7. Create Example Test File
   const createExampleCmd = vscode.commands.registerCommand('routecase.createExample', async () => {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders || workspaceFolders.length === 0) {
@@ -95,59 +124,63 @@ export function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    const exampleContent = JSON.stringify({
-      "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
-      "name": "Superhero API Test Suite",
-      "baseUrl": "http://localhost:3000",
-      "tests": [
-        {
-          "name": "Get superhero by name",
-          "method": "GET",
-          "path": "/api/info/{name}",
-          "success": [
-            {
-              "name": "Find Batman",
-              "params": {
-                "name": "Batman"
-              },
-              "expect": {
-                "status": 200,
-                "bodyContains": "Batman"
+    const exampleContent = JSON.stringify(
+      {
+        $schema: 'https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json',
+        name: 'Superhero API Test Suite',
+        baseUrl: 'http://localhost:3000',
+        tests: [
+          {
+            name: 'Get superhero by name',
+            method: 'GET',
+            path: '/api/info/{name}',
+            success: [
+              {
+                name: 'Find Batman',
+                params: {
+                  name: 'Batman'
+                },
+                expect: {
+                  status: 200,
+                  bodyContains: 'Batman'
+                }
               }
-            }
-          ],
-          "errors": [
-            {
-              "name": "Unknown superhero",
-              "params": {
-                "name": "UnknownHero123"
+            ],
+            errors: [
+              {
+                name: 'Unknown superhero',
+                params: {
+                  name: 'UnknownHero123'
+                },
+                expect: {
+                  status: 404
+                }
               },
-              "expect": {
-                "status": 404
-              }
-            },
-            {
-              "name": "Invalid name rat",
-              "params": {
-                "name": "rat"
+              {
+                name: 'Invalid name rat',
+                params: {
+                  name: 'rat'
+                },
+                expect: {
+                  status: 404
+                }
               },
-              "expect": {
-                "status": 404
+              {
+                name: 'Invalid name king',
+                params: {
+                  name: 'king'
+                },
+                expect: {
+                  status: 404
+                }
               }
-            },
-            {
-              "name": "Invalid name king",
-              "params": {
-                "name": "king"
-              },
-              "expect": {
-                "status": 404
-              }
-            }
-          ]
-        }
-      ]
-    }, null, 2);
+            ]
+          }
+        ]
+      },
+      null,
+      2
+    );
 
     fs.writeFileSync(targetPath, exampleContent, 'utf8');
     const doc = await vscode.workspace.openTextDocument(targetPath);
@@ -155,12 +188,12 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage('Created "api.rcase" example test file.');
   });
 
-  // 6. Open Results Panel
+  // 8. Open Results Panel
   const openPanelCmd = vscode.commands.registerCommand('routecase.openResultsPanel', (caseId?: string) => {
     RouteCaseResultsPanel.createOrShow(context.extensionUri, lastSuiteResult, caseId);
   });
 
-  // 7. Rerun Case
+  // 9. Rerun Case
   const rerunCaseCmd = vscode.commands.registerCommand('routecase.rerunCase', async (caseId?: string) => {
     vscode.window.showInformationMessage(`Rerunning test case ${caseId ?? ''}...`);
     const activeUri = getActiveRCaseUri();
@@ -172,6 +205,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     runCurrentFileCmd,
     runAllCmd,
+    runSingleCaseCmd,
+    runEndpointCmd,
     stopRunCmd,
     validateCmd,
     createExampleCmd,
@@ -180,7 +215,11 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-async function executeFile(fileUri: vscode.Uri, context: vscode.ExtensionContext): Promise<void> {
+async function executeFile(
+  fileUri: vscode.Uri,
+  context: vscode.ExtensionContext,
+  filter?: ExecutionFilter
+): Promise<void> {
   const filePath = fileUri.fsPath;
   const fileName = path.basename(filePath);
 
@@ -203,7 +242,13 @@ async function executeFile(fileUri: vscode.Uri, context: vscode.ExtensionContext
   const doc = parseResult.document;
   currentExecutor = new TestExecutor();
 
-  statusBarItem.text = `$(sync~spin) Running ${fileName}...`;
+  const titlePrefix = filter?.caseName
+    ? `RouteCase: Executing case "${filter.caseName}"`
+    : filter?.endpointName
+    ? `RouteCase: Executing endpoint "${filter.endpointName}"`
+    : `RouteCase: Executing ${fileName}`;
+
+  statusBarItem.text = `$(sync~spin) Running ${filter?.caseName || fileName}...`;
   statusBarItem.show();
 
   const config = vscode.workspace.getConfiguration('routecase');
@@ -215,7 +260,7 @@ async function executeFile(fileUri: vscode.Uri, context: vscode.ExtensionContext
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
-        title: `RouteCase: Executing ${fileName}`,
+        title: titlePrefix,
         cancellable: true
       },
       async (progress, token) => {
@@ -227,14 +272,20 @@ async function executeFile(fileUri: vscode.Uri, context: vscode.ExtensionContext
           timeoutMs,
           maxResponseSizeBytes,
           followRedirects,
+          filter,
           onCaseStart: tc => {
             progress.report({ message: `${tc.endpointName} -> ${tc.caseName}` });
             treeProvider.setCaseRunning(tc.id, tc.endpointName, tc.caseName);
+          },
+          onCaseComplete: result => {
+            RouteCaseCodeLensProvider.recordResult(filePath, result);
+            codeLensProvider.refresh();
           }
         });
 
         lastSuiteResult = suiteResult;
         treeProvider.setSuiteResult(suiteResult);
+        codeLensProvider.refresh();
 
         // Update webview if open
         if (RouteCaseResultsPanel.currentPanel) {
@@ -243,13 +294,14 @@ async function executeFile(fileUri: vscode.Uri, context: vscode.ExtensionContext
 
         if (suiteResult.failedCount === 0 && suiteResult.errorCount === 0) {
           statusBarItem.text = `$(check) RouteCase: ${suiteResult.passedCount}/${suiteResult.totalCount} Passed`;
-          vscode.window.showInformationMessage(
-            `RouteCase: All ${suiteResult.totalCount} tests in "${fileName}" passed in ${suiteResult.durationMs}ms!`
-          );
+          const msg = filter?.caseName
+            ? `RouteCase: "${filter.caseName}" passed in ${suiteResult.durationMs}ms!`
+            : `RouteCase: All ${suiteResult.totalCount} tests passed in ${suiteResult.durationMs}ms!`;
+          vscode.window.showInformationMessage(msg);
         } else {
           statusBarItem.text = `$(error) RouteCase: ${suiteResult.failedCount} Failed, ${suiteResult.errorCount} Errors`;
           const action = await vscode.window.showWarningMessage(
-            `RouteCase: ${suiteResult.passedCount} passed, ${suiteResult.failedCount} failed, ${suiteResult.errorCount} errors in "${fileName}".`,
+            `RouteCase: ${suiteResult.passedCount} passed, ${suiteResult.failedCount} failed, ${suiteResult.errorCount} errors.`,
             'View Results Panel'
           );
           if (action === 'View Results Panel') {

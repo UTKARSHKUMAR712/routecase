@@ -75,11 +75,17 @@ export interface TestSuiteResult {
   results: ExecutedTestCase[];
 }
 
+export interface ExecutionFilter {
+  endpointName?: string;
+  caseName?: string;
+}
+
 export interface ExecutionOptions {
   timeoutMs?: number;
   maxResponseSizeBytes?: number;
   followRedirects?: boolean;
   signal?: AbortSignal;
+  filter?: ExecutionFilter;
   onCaseStart?: (testCase: { id: string; endpointName: string; caseName: string }) => void;
   onCaseComplete?: (result: ExecutedTestCase) => void;
 }

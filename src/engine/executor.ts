@@ -29,7 +29,7 @@ export class TestExecutor {
     const suiteStartTime = Date.now();
     const results: ExecutedTestCase[] = [];
 
-    // Flatten all test cases across all endpoints
+    // Flatten all test cases across all endpoints, applying filters if specified
     const tasks: Array<{
       endpoint: EndpointDefinition;
       testCase: TestCaseDefinition;
@@ -37,13 +37,22 @@ export class TestExecutor {
     }> = [];
 
     for (const endpoint of document.tests) {
+      if (options.filter?.endpointName && endpoint.name !== options.filter.endpointName) {
+        continue;
+      }
       if (endpoint.success) {
         for (const sc of endpoint.success) {
+          if (options.filter?.caseName && sc.name !== options.filter.caseName) {
+            continue;
+          }
           tasks.push({ endpoint, testCase: sc, kind: 'success' });
         }
       }
       if (endpoint.errors) {
         for (const ec of endpoint.errors) {
+          if (options.filter?.caseName && ec.name !== options.filter.caseName) {
+            continue;
+          }
           tasks.push({ endpoint, testCase: ec, kind: 'error' });
         }
       }

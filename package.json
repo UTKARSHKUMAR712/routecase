@@ -90,6 +90,18 @@
         "icon": "$(play-circle)"
       },
       {
+        "command": "routecase.runSingleCase",
+        "title": "Run Test Case",
+        "category": "RouteCase",
+        "icon": "$(play)"
+      },
+      {
+        "command": "routecase.runEndpoint",
+        "title": "Run Endpoint Cases",
+        "category": "RouteCase",
+        "icon": "$(play)"
+      },
+      {
         "command": "routecase.stopRun",
         "title": "Stop Test Run",
         "category": "RouteCase",
