@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="resources/icon.png" width="120" height="120" alt="RouteCase Logo" />
+</p>
+
 # RouteCase — API Route & Endpoint Tester for VS Code
 
 [![Visual Studio Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/)
