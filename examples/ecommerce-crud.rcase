@@ -1,0 +1,147 @@
+{
+  "$schema": "../schemas/rcase.schema.json",
+  "name": "E-Commerce REST API Test Suite",
+  "baseUrl": "https://api.shop.local:8080",
+  "headers": {
+    "Accept": "application/json",
+    "x-tenant-id": "us-east-retail"
+  },
+  "tests": [
+    {
+      "name": "List and paginate store products",
+      "method": "GET",
+      "path": "/products?page={page}&limit={limit}",
+      "success": [
+        {
+          "name": "First page default list",
+          "params": {
+            "page": 1,
+            "limit": 20
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "items",
+            "maxDurationMs": 500
+          }
+        },
+        {
+          "name": "Second page pagination",
+          "params": {
+            "page": 2,
+            "limit": 10
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "items"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Exceeded maximum limit per page",
+          "params": {
+            "page": 1,
+            "limit": 5000
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "Limit cannot exceed 100"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Submit new customer order",
+      "method": "POST",
+      "path": "/orders",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer customer-session-token"
+      },
+      "success": [
+        {
+          "name": "Place valid order with multiple line items",
+          "body": {
+            "customerId": "cust_88219",
+            "shippingAddress": {
+              "street": "742 Evergreen Terrace",
+              "city": "Springfield",
+              "zip": "97477",
+              "country": "US"
+            },
+            "items": [
+              { "productId": "sku_101", "quantity": 2, "price": 25.50 },
+              { "productId": "sku_204", "quantity": 1, "price": 89.00 }
+            ],
+            "paymentMethod": "credit_card"
+          },
+          "expect": {
+            "status": 201,
+            "bodyContains": "orderId",
+            "maxDurationMs": 800
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Reject empty line items array",
+          "body": {
+            "customerId": "cust_88219",
+            "items": []
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "Order must contain at least one line item"
+          }
+        },
+        {
+          "name": "Reject checkout without authentication",
+          "headers": {
+            "Authorization": ""
+          },
+          "body": {
+            "customerId": "cust_88219"
+          },
+          "expect": {
+            "status": 401
+          }
+        }
+      ]
+    },
+    {
+      "name": "Track order status by order ID",
+      "method": "GET",
+      "path": "/orders/{orderId}",
+      "headers": {
+        "Authorization": "Bearer customer-session-token"
+      },
+      "success": [
+        {
+          "name": "Retrieve shipped order",
+          "params": {
+            "orderId": "ord_9901"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "SHIPPED"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Order not found",
+          "params": {
+            "orderId": "ord_nonexistent_0000"
+          },
+          "expect": {
+            "status": 404,
+            "bodyEquals": {
+              "error": "Not Found",
+              "code": 404
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+{
+  "$schema": "../schemas/rcase.schema.json",
+  "name": "Comprehensive RouteCase Showcase Suite (All Features)",
+  "baseUrl": "https://api.example.com",
+  "headers": {
+    "Accept": "application/json",
+    "User-Agent": "RouteCase-TestRunner/0.1.0"
+  },
+  "tests": [
+    {
+      "name": "Create new product item",
+      "method": "POST",
+      "path": "/api/v1/products",
+      "headers": {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key-9988"
+      },
+      "success": [
+        {
+          "name": "Standard product creation",
+          "description": "Verify product creation returns 201 Created with generated ID and strict latency SLA",
+          "body": {
+            "title": "Ergonomic Mechanical Keyboard",
+            "price": 149.99,
+            "currency": "USD",
+            "category": "Electronics",
+            "inStock": true,
+            "tags": ["hardware", "keyboard", "usb-c"],
+            "dimensions": {
+              "width": 35.5,
+              "depth": 14.0,
+              "weightGrams": 850
+            }
+          },
+          "expect": {
+            "status": 201,
+            "bodyContains": "Ergonomic Mechanical Keyboard",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "maxDurationMs": 450
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Validation error on negative price",
+          "description": "Ensure negative price triggers a 422 Unprocessable Entity error response",
+          "body": {
+            "title": "Invalid Price Item",
+            "price": -25.0,
+            "category": "Electronics"
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "Price must be greater than zero"
+          }
+        },
+        {
+          "name": "Missing required title",
+          "description": "Payload without title field returns 400 Bad Request",
+          "body": {
+            "price": 29.99
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "title is required"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search & filter catalog with query parameters",
+      "method": "GET",
+      "path": "/api/v1/products/search?category={category}&minPrice={minPrice}&inStock={inStock}",
+      "success": [
+        {
+          "name": "Search electronics in stock",
+          "description": "Verify multiple query parameters with special characters and spaces are safely encoded",
+          "params": {
+            "category": "Computers & Laptops",
+            "minPrice": 50,
+            "inStock": true
+          },
+          "query": {
+            "page": 1,
+            "limit": 25,
+            "sort": "price_asc"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "results",
+            "maxDurationMs": 600
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Invalid pagination page number",
+          "params": {
+            "category": "Electronics",
+            "minPrice": 0,
+            "inStock": true
+          },
+          "query": {
+            "page": -1,
+            "limit": 10
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "page must be positive integer"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fetch product by path ID template",
+      "method": "GET",
+      "path": "/api/v1/products/{id}",
+      "success": [
+        {
+          "name": "Fetch existing product (id: prod_101)",
+          "params": {
+            "id": "prod_101"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "prod_101",
+            "maxDurationMs": 250
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Product not found",
+          "params": {
+            "id": "prod_nonexistent_9999"
+          },
+          "expect": {
+            "status": 404,
+            "bodyEquals": {
+              "error": "NotFound",
+              "message": "Product with ID prod_nonexistent_9999 does not exist"
+            }
+          }
+        },
+        {
+          "name": "Invalid UUID/format ID",
+          "params": {
+            "id": "###invalid@@@"
+          },
+          "expect": {
+            "status": 400
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partial update product stock & price",
+      "method": "PATCH",
+      "path": "/api/v1/products/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer sample-jwt-access-token"
+      },
+      "success": [
+        {
+          "name": "Discount price adjustment",
+          "params": {
+            "id": "prod_101"
+          },
+          "body": {
+            "price": 129.99,
+            "onSale": true
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "129.99"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Unauthorized update attempt without valid token",
+          "params": {
+            "id": "prod_101"
+          },
+          "headers": {
+            "Authorization": "Bearer expired-or-invalid-token"
+          },
+          "body": {
+            "price": 10.0
+          },
+          "expect": {
+            "status": 401,
+            "bodyContains": "Unauthorized"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete obsolete product (Admin only)",
+      "method": "DELETE",
+      "path": "/api/v1/products/{id}",
+      "headers": {
+        "Authorization": "Bearer admin-super-secret-token"
+      },
+      "success": [
+        {
+          "name": "Delete discontinued product",
+          "params": {
+            "id": "prod_legacy_404"
+          },
+          "expect": {
+            "status": 204
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Forbidden for non-admin accounts",
+          "params": {
+            "id": "prod_legacy_404"
+          },
+          "headers": {
+            "Authorization": "Bearer standard-customer-token"
+          },
+          "expect": {
+            "status": 403,
+            "bodyContains": "Forbidden"
+          }
+        }
+      ]
+    }
+  ]
+}

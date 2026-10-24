@@ -116,76 +116,107 @@ export function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    const targetPath = path.join(workspaceFolders[0].uri.fsPath, 'api.rcase');
+    interface ExampleChoice extends vscode.QuickPickItem {
+      file: string;
+      targetName: string;
+    }
+
+    const choices: ExampleChoice[] = [
+      {
+        label: '$(sparkle) All-Features Master Suite',
+        description: 'all-features.rcase',
+        detail: 'Comprehensive showcase with all HTTP methods, parameters, bodies, and assertions',
+        file: 'all-features.rcase',
+        targetName: 'all-features.rcase'
+      },
+      {
+        label: '$(globe) Live GitHub Public API',
+        description: 'github-api.rcase',
+        detail: 'Live requests against api.github.com — run immediately without a local server!',
+        file: 'github-public-api.rcase',
+        targetName: 'github-api.rcase'
+      },
+      {
+        label: '$(package) E-Commerce CRUD API',
+        description: 'ecommerce.rcase',
+        detail: 'Products & Orders with POST, GET, PUT, DELETE, query filters, and bodies',
+        file: 'ecommerce-crud.rcase',
+        targetName: 'ecommerce.rcase'
+      },
+      {
+        label: '$(lock) Auth, JWT & Security',
+        description: 'auth.rcase',
+        detail: 'Login, Bearer auth, RBAC, 401/403 errors, and credential redaction',
+        file: 'auth-and-security.rcase',
+        targetName: 'auth.rcase'
+      },
+      {
+        label: '$(zap) Superhero Quick Start',
+        description: 'superheroes.rcase',
+        detail: 'Classic starter example showing path parameter expansion and assertions',
+        file: 'superheroes.rcase',
+        targetName: 'superheroes.rcase'
+      },
+      {
+        label: '$(account) RESTful Users & Pagination',
+        description: 'users-api.rcase',
+        detail: 'User CRUD with query pagination, search, and validation',
+        file: 'users-api.rcase',
+        targetName: 'users-api.rcase'
+      },
+      {
+        label: '$(bug) Error Handling & Edge Cases',
+        description: 'error-handling.rcase',
+        detail: 'Simulated 400, 404, 500 status codes, timeouts, and edge cases',
+        file: 'error-handling.rcase',
+        targetName: 'error-handling.rcase'
+      }
+    ];
+
+    const selected = await vscode.window.showQuickPick(choices, {
+      placeHolder: 'Select a RouteCase example template to create in your workspace'
+    });
+
+    if (!selected) {
+      return;
+    }
+
+    const targetPath = path.join(workspaceFolders[0].uri.fsPath, selected.targetName);
     if (fs.existsSync(targetPath)) {
-      vscode.window.showWarningMessage(`"api.rcase" already exists in workspace root.`);
+      vscode.window.showWarningMessage(`"${selected.targetName}" already exists in workspace root.`);
       const doc = await vscode.workspace.openTextDocument(targetPath);
       await vscode.window.showTextDocument(doc);
       return;
     }
 
-    const exampleContent = JSON.stringify(
-      {
-        $schema: 'https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json',
-        name: 'Superhero API Test Suite',
-        baseUrl: 'http://localhost:3000',
-        tests: [
-          {
-            name: 'Get superhero by name',
-            method: 'GET',
-            path: '/api/info/{name}',
-            success: [
-              {
-                name: 'Find Batman',
-                params: {
-                  name: 'Batman'
-                },
-                expect: {
-                  status: 200,
-                  bodyContains: 'Batman'
-                }
-              }
-            ],
-            errors: [
-              {
-                name: 'Unknown superhero',
-                params: {
-                  name: 'UnknownHero123'
-                },
-                expect: {
-                  status: 404
-                }
-              },
-              {
-                name: 'Invalid name rat',
-                params: {
-                  name: 'rat'
-                },
-                expect: {
-                  status: 404
-                }
-              },
-              {
-                name: 'Invalid name king',
-                params: {
-                  name: 'king'
-                },
-                expect: {
-                  status: 404
-                }
-              }
-            ]
-          }
-        ]
-      },
-      null,
-      2
-    );
+    const bundledExamplePath = context.asAbsolutePath(path.join('examples', selected.file));
+    let content: string;
+    if (fs.existsSync(bundledExamplePath)) {
+      content = fs.readFileSync(bundledExamplePath, 'utf8');
+    } else {
+      content = JSON.stringify(
+        {
+          $schema: 'https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json',
+          name: 'RouteCase Quick Start Suite',
+          baseUrl: 'http://localhost:3000',
+          tests: [
+            {
+              name: 'Sample Endpoint',
+              method: 'GET',
+              path: '/api/items/{id}',
+              success: [{ name: 'Valid Item', params: { id: 1 }, expect: { status: 200 } }]
+            }
+          ]
+        },
+        null,
+        2
+      );
+    }
 
-    fs.writeFileSync(targetPath, exampleContent, 'utf8');
+    fs.writeFileSync(targetPath, content, 'utf8');
     const doc = await vscode.workspace.openTextDocument(targetPath);
     await vscode.window.showTextDocument(doc);
-    vscode.window.showInformationMessage('Created "api.rcase" example test file.');
+    vscode.window.showInformationMessage(`Created "${selected.targetName}" example test file.`);
   });
 
   // 8. Open Results Panel

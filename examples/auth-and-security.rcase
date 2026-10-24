@@ -1,0 +1,135 @@
+{
+  "$schema": "../schemas/rcase.schema.json",
+  "name": "Authentication, RBAC & Security Test Suite",
+  "baseUrl": "https://identity.enterprise.internal",
+  "headers": {
+    "Accept": "application/json"
+  },
+  "tests": [
+    {
+      "name": "User credential authentication",
+      "method": "POST",
+      "path": "/auth/v2/login",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "success": [
+        {
+          "name": "Successful login returns access and refresh tokens",
+          "body": {
+            "email": "developer@company.com",
+            "password": "CorrectPassword123!"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "accessToken",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "maxDurationMs": 500
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Invalid password returns 401 Unauthorized",
+          "body": {
+            "email": "developer@company.com",
+            "password": "WrongPassword999!"
+          },
+          "expect": {
+            "status": 401,
+            "bodyContains": "Invalid credentials"
+          }
+        },
+        {
+          "name": "Malformed email format returns 422 Unprocessable",
+          "body": {
+            "email": "not-an-email-string",
+            "password": "SomePassword"
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "Invalid email address"
+          }
+        },
+        {
+          "name": "Missing password field",
+          "body": {
+            "email": "developer@company.com"
+          },
+          "expect": {
+            "status": 400
+          }
+        }
+      ]
+    },
+    {
+      "name": "Protected user profile endpoint",
+      "method": "GET",
+      "path": "/auth/v2/me",
+      "headers": {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_token"
+      },
+      "success": [
+        {
+          "name": "Valid Bearer token resolves user profile",
+          "expect": {
+            "status": 200,
+            "bodyContains": "developer@company.com"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Expired token returns 401 with TokenExpired code",
+          "headers": {
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.expired_token"
+          },
+          "expect": {
+            "status": 401,
+            "bodyContains": "TokenExpired"
+          }
+        },
+        {
+          "name": "Omitted Authorization header returns 401",
+          "headers": {
+            "Authorization": ""
+          },
+          "expect": {
+            "status": 401
+          }
+        }
+      ]
+    },
+    {
+      "name": "Role-Based Access Control (Admin Dashboard)",
+      "method": "GET",
+      "path": "/admin/audit-logs",
+      "headers": {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.standard_user"
+      },
+      "success": [
+        {
+          "name": "Admin access granted for superuser token",
+          "headers": {
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.admin_token"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "logs"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Non-admin role blocked with 403 Forbidden",
+          "expect": {
+            "status": 403,
+            "bodyContains": "Requires Administrator Role"
+          }
+        }
+      ]
+    }
+  ]
+}

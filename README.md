@@ -75,6 +75,269 @@ Whenever you open a `.rcase` file, RouteCase renders clickable **CodeLens action
 
 ---
 
+## 🌟 The All-Included Master Example (`all-features.rcase`)
+
+Here is a complete, production-grade `.rcase` definition demonstrating **every single capability** of RouteCase in one file:
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
+  "name": "Comprehensive RouteCase Showcase Suite (All Features)",
+  "baseUrl": "https://api.example.com",
+  "headers": {
+    "Accept": "application/json",
+    "User-Agent": "RouteCase-TestRunner/0.1.0"
+  },
+  "tests": [
+    {
+      "name": "Create new product item",
+      "method": "POST",
+      "path": "/api/v1/products",
+      "headers": {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key-9988"
+      },
+      "success": [
+        {
+          "name": "Standard product creation",
+          "description": "Verifies 201 Created with generated title, headers, and strict latency SLA",
+          "body": {
+            "title": "Ergonomic Mechanical Keyboard",
+            "price": 149.99,
+            "currency": "USD",
+            "category": "Electronics",
+            "inStock": true,
+            "tags": ["hardware", "keyboard", "usb-c"]
+          },
+          "expect": {
+            "status": 201,
+            "bodyContains": "Ergonomic Mechanical Keyboard",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "maxDurationMs": 450
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Validation error on negative price",
+          "description": "Ensure negative price triggers a 422 Unprocessable response",
+          "body": {
+            "title": "Invalid Price Item",
+            "price": -25.0,
+            "category": "Electronics"
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "Price must be greater than zero"
+          }
+        },
+        {
+          "name": "Missing required title",
+          "description": "Payload without title field returns 400 Bad Request",
+          "body": {
+            "price": 29.99
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "title is required"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search & filter catalog with query parameters",
+      "method": "GET",
+      "path": "/api/v1/products/search?category={category}&minPrice={minPrice}&inStock={inStock}",
+      "success": [
+        {
+          "name": "Search electronics in stock",
+          "description": "Safe query parameter substitution with spaces, special characters, and pagination",
+          "params": {
+            "category": "Computers & Laptops",
+            "minPrice": 50,
+            "inStock": true
+          },
+          "query": {
+            "page": 1,
+            "limit": 25,
+            "sort": "price_asc"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "results",
+            "maxDurationMs": 600
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Invalid pagination page number",
+          "params": {
+            "category": "Electronics",
+            "minPrice": 0,
+            "inStock": true
+          },
+          "query": {
+            "page": -1,
+            "limit": 10
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "page must be positive integer"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fetch product by path ID template",
+      "method": "GET",
+      "path": "/api/v1/products/{id}",
+      "success": [
+        {
+          "name": "Fetch existing product (id: prod_101)",
+          "params": {
+            "id": "prod_101"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "prod_101",
+            "maxDurationMs": 250
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Product not found",
+          "params": {
+            "id": "prod_nonexistent_9999"
+          },
+          "expect": {
+            "status": 404,
+            "bodyEquals": {
+              "error": "NotFound",
+              "message": "Product with ID prod_nonexistent_9999 does not exist"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partial update product stock & price",
+      "method": "PATCH",
+      "path": "/api/v1/products/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer sample-jwt-access-token"
+      },
+      "success": [
+        {
+          "name": "Discount price adjustment",
+          "params": {
+            "id": "prod_101"
+          },
+          "body": {
+            "price": 129.99,
+            "onSale": true
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "129.99"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Unauthorized update attempt without valid token",
+          "params": {
+            "id": "prod_101"
+          },
+          "headers": {
+            "Authorization": "Bearer expired-or-invalid-token"
+          },
+          "body": {
+            "price": 10.0
+          },
+          "expect": {
+            "status": 401,
+            "bodyContains": "Unauthorized"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete obsolete product (Admin only)",
+      "method": "DELETE",
+      "path": "/api/v1/products/{id}",
+      "headers": {
+        "Authorization": "Bearer admin-super-secret-token"
+      },
+      "success": [
+        {
+          "name": "Delete discontinued product",
+          "params": {
+            "id": "prod_legacy_404"
+          },
+          "expect": {
+            "status": 204
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Forbidden for non-admin accounts",
+          "params": {
+            "id": "prod_legacy_404"
+          },
+          "headers": {
+            "Authorization": "Bearer standard-customer-token"
+          },
+          "expect": {
+            "status": 403,
+            "bodyContains": "Forbidden"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### What This Example Showcases:
+| Feature | Implementation in Example |
+| :--- | :--- |
+| **All HTTP Methods** | Demonstrates `GET`, `POST`, `PATCH`, and `DELETE`. |
+| **Path Placeholders** | `/api/v1/products/{id}` dynamically replaced from `params: { "id": "prod_101" }`. |
+| **Query Parameters** | Combined template (`?category={category}`) + `query: { "page": 1, "limit": 25 }`. |
+| **Nested JSON Bodies** | Complex payload with objects, numbers, booleans, and arrays. |
+| **Status Assertions** | Validates `200 OK`, `201 Created`, `204 No Content`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, and `422 Unprocessable`. |
+| **Substring Assertions** | `bodyContains`: checks for key strings in response body. |
+| **Deep JSON Equality** | `bodyEquals`: compares structured JSON objects for exact match. |
+| **Header Assertions** | `headers`: validates expected response headers like `content-type`. |
+| **Latency SLA Benchmark** | `maxDurationMs`: fails if the endpoint takes longer than specified milliseconds (e.g. 250ms). |
+| **Automatic Secret Redaction** | Headers like `Authorization` and `x-api-key` are automatically redacted with `[REDACTED]` in reports. |
+
+---
+
+## 📚 Bundled Examples Library
+
+RouteCase includes 7 real-world test suites ready to explore:
+
+| Example File | Scenario & Purpose |
+| :--- | :--- |
+| **`all-features.rcase`** | **Master Showcase:** Every feature, HTTP method, parameter type, and assertion. |
+| **`github-public-api.rcase`** | **Live Public API:** Tests live `api.github.com` endpoints (run instantly without localhost!). |
+| **`ecommerce-crud.rcase`** | **Store API:** Products catalog, cart line items, orders checkout, and tracking. |
+| **`auth-and-security.rcase`** | **Authentication & RBAC:** Login JWTs, Bearer auth, expired tokens, and 401/403 security checks. |
+| **`superheroes.rcase`** | **Quick Start:** Classic path-parameter expansion with success and error cases. |
+| **`users-api.rcase`** | **RESTful Users:** User CRUD, query string filtering, pagination, and data validation. |
+| **`error-handling.rcase`** | **Edge Cases & Diagnostics:** Simulated server errors, timeouts, and edge cases. |
+
+> **Tip:** Press `Ctrl+Shift+P` (or `Cmd+Shift+P`) > run **`RouteCase: Create Example Test File`** to pick and create any of these templates directly inside your project!
+
+---
+
 ## Quick Start
 
 ### 1. Create a `.rcase` Test File

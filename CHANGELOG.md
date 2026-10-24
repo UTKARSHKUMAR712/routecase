@@ -5,6 +5,16 @@ All notable changes to the **RouteCase** extension will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-10-24
+
+### Added
+- **All-Features Showcase Example:** Added comprehensive `all-features.rcase` showcasing every HTTP method (`GET`, `POST`, `PATCH`, `DELETE`), path/query parameters, nested JSON bodies, and assertion types (`status`, `bodyContains`, `bodyEquals`, `headers`, `maxDurationMs`).
+- **Live Public API Example:** Added `github-public-api.rcase` querying live GitHub REST endpoints so developers can run tests immediately without starting a local server.
+- **E-Commerce CRUD Suite:** Added `ecommerce-crud.rcase` testing product catalogs, order submission, and line item checkout.
+- **Auth & Security Suite:** Added `auth-and-security.rcase` demonstrating login JWTs, Bearer token authentication, 401/403 errors, and automatic secret redaction.
+- **Interactive Template Chooser:** Enhanced `RouteCase: Create Example Test File` command to prompt with a rich QuickPick selection of real-world templates.
+- **Marketplace Master Documentation:** Expanded `README.md` with the full all-included reference example and feature matrix.
+
 ## [0.1.0] - 2026-10-24
 
 ### Initial Release

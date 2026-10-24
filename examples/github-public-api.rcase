@@ -1,0 +1,106 @@
+{
+  "$schema": "../schemas/rcase.schema.json",
+  "name": "Live GitHub REST API Test Suite",
+  "baseUrl": "https://api.github.com",
+  "headers": {
+    "Accept": "application/vnd.github.v3+json",
+    "User-Agent": "RouteCase-VSCode-Extension"
+  },
+  "tests": [
+    {
+      "name": "Get public user profile",
+      "method": "GET",
+      "path": "/users/{username}",
+      "success": [
+        {
+          "name": "Fetch Octocat profile",
+          "description": "Verifies GitHub's famous mascot account returns 200 OK and User type",
+          "params": {
+            "username": "octocat"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "octocat",
+            "maxDurationMs": 2500
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Non-existent GitHub username",
+          "description": "Ensure non-existent user responds with 404 Not Found",
+          "params": {
+            "username": "non-existent-user-routecase-9999999"
+          },
+          "expect": {
+            "status": 404,
+            "bodyContains": "Not Found"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get repository metadata",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}",
+      "success": [
+        {
+          "name": "Fetch RouteCase repository metadata",
+          "params": {
+            "owner": "UTKARSHKUMAR712",
+            "repo": "routecase"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "routecase"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Repository not found",
+          "params": {
+            "owner": "UTKARSHKUMAR712",
+            "repo": "this-repo-does-not-exist-xyz123"
+          },
+          "expect": {
+            "status": 404,
+            "bodyContains": "Not Found"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search public repositories",
+      "method": "GET",
+      "path": "/search/repositories?q={query}&sort=stars&order=desc",
+      "success": [
+        {
+          "name": "Search for vscode extensions",
+          "params": {
+            "query": "topic:vscode-extension"
+          },
+          "query": {
+            "per_page": 5
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "total_count"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Empty search query error",
+          "params": {
+            "query": ""
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "Validation Failed"
+          }
+        }
+      ]
+    }
+  ]
+}
