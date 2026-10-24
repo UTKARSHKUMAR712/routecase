@@ -6,12 +6,17 @@
 
 # RouteCase — API Route & Endpoint Tester for VS Code
 
+[![Official Website](https://img.shields.io/badge/Website-routecase.vercel.app-10B981.svg)](https://routecase.vercel.app/)
+[![Documentation](https://img.shields.io/badge/Docs-Explore%20Guides-34D399.svg)](https://routecase.vercel.app/introduction/)
 [![Visual Studio Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase)
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/UtkarshKumar.routecase)](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase)
 [![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/UtkarshKumar.routecase)](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**RouteCase** is a modern, lightweight VS Code extension for testing HTTP APIs — directly from your editor. No browser, no external app, no accounts.
+**RouteCase** is a modern, lightweight, 100% offline VS Code extension for testing HTTP APIs — directly from your editor. No browser, no external app, no accounts, and zero cloud telemetry.
+
+🌐 **Official Website & Docs:** [https://routecase.vercel.app/](https://routecase.vercel.app/)  
+👨‍💻 **Author & Lead Engineer:** [Utkarsh Kumar (utkarshkumar712)](https://github.com/UTKARSHKUMAR712) • [LinkedIn](https://www.linkedin.com/in/utkarsh-kumar-8344b1337)
 
 Define your API endpoints once in a `.rcase` file, run every input case with one click, and see instant PASS / FAIL results right inside VS Code — just like Jupyter Notebook cells for your API routes.
 
@@ -786,8 +791,21 @@ Every test case has an `expect` block. All fields except `status` are optional:
 
 ---
 
+## Links & Community
+
+- 🌐 **Official Website:** [https://routecase.vercel.app/](https://routecase.vercel.app/)
+- 📖 **Documentation Portal:** [https://routecase.vercel.app/introduction/](https://routecase.vercel.app/introduction/)
+- 🚀 **Quickstart Guide:** [https://routecase.vercel.app/getting-started/quickstart/](https://routecase.vercel.app/getting-started/quickstart/)
+- 📦 **VS Code Marketplace:** [https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase)
+- 💻 **Extension Repository:** [https://github.com/UTKARSHKUMAR712/routecase](https://github.com/UTKARSHKUMAR712/routecase)
+- 🌐 **Website Repository:** [https://github.com/UTKARSHKUMAR712/routecase_website](https://github.com/UTKARSHKUMAR712/routecase_website)
+- 👨‍💻 **Creator & Maintainer:** [Utkarsh Kumar (@UTKARSHKUMAR712)](https://github.com/UTKARSHKUMAR712) • [LinkedIn](https://www.linkedin.com/in/utkarsh-kumar-8344b1337)
+- 🐛 **Issue Tracker:** [https://github.com/UTKARSHKUMAR712/routecase/issues](https://github.com/UTKARSHKUMAR712/routecase/issues)
+
+---
+
 ## License
 
-[MIT License](https://opensource.org/licenses/MIT) © 2026 RouteCase Contributors
+[MIT License](https://opensource.org/licenses/MIT) © 2026 Utkarsh Kumar & RouteCase Contributors
 
-[GitHub](https://github.com/UTKARSHKUMAR712/routecase) · [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase) · [Report an Issue](https://github.com/UTKARSHKUMAR712/routecase/issues)
+[Official Website](https://routecase.vercel.app/) · [GitHub](https://github.com/UTKARSHKUMAR712/routecase) · [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase) · [Report an Issue](https://github.com/UTKARSHKUMAR712/routecase/issues)

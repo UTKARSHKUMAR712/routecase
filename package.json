@@ -4,6 +4,7 @@
   "description": "Define API endpoints once and run multiple input cases against them directly inside VS Code.",
   "version": "0.2.0",
   "publisher": "UtkarshKumar",
+  "homepage": "https://routecase.vercel.app",
   "license": "MIT",
   "repository": {
     "type": "git",
