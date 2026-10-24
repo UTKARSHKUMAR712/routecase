@@ -6,43 +6,71 @@ When you trigger a test in RouteCase, each test case passes through a well-defin
 
 ## The Request Execution Pipeline
 
-```
- ┌─────────────────────────────────────────────────────────────┐
- │ 1. Load Environment (.rcase.env, .rcase.env.json, settings) │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
- ┌──────────────────────────────▼──────────────────────────────┐
- │ 2. Merge Environment & Captured Variables into Context      │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
- ┌──────────────────────────────▼──────────────────────────────┐
- │ 3. Substitute Variables in params, query, body & headers     │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
- ┌──────────────────────────────▼──────────────────────────────┐
- │ 4. Generate Built-in Dynamic Values ({{$uuid}}, {{$isoDate}})│
- └──────────────────────────────┬──────────────────────────────┘
-                                │
- ┌──────────────────────────────▼──────────────────────────────┐
- │ 5. Build WHATWG URL & Merge Headers (File < Endpoint < Case)│
- └──────────────────────────────┬──────────────────────────────┘
-                                │
- ┌──────────────────────────────▼──────────────────────────────┐
- │ 6. Execute HTTP/HTTPS Socket (Node.js http/https client)    │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
- ┌──────────────────────────────▼──────────────────────────────┐
- │ 7. Evaluate Assertions (Status, bodyContains, bodyEquals)   │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
- ┌──────────────────────────────▼──────────────────────────────┐
- │ 8. Extract & Store 'capture' Variables for Downstream Cases │
- └──────────────────────────────┬──────────────────────────────┘
-                                │
- ┌──────────────────────────────▼──────────────────────────────┐
- │ 9. Emit Results to CodeLens Badge, Tree View & Results Panel│
- └─────────────────────────────────────────────────────────────┘
-```
+<div v-pre class="rc-pipeline-stepper">
+<div class="rc-pipeline-step-item">
+  <span class="rc-pipeline-num">01</span>
+  <div class="rc-pipeline-info">
+    <span class="rc-pipeline-name">Load Workspace Environment</span>
+    <span class="rc-pipeline-sub">Scans for .rcase.env, .rcase.env.json & workspace settings</span>
+  </div>
+</div>
+<div class="rc-pipeline-step-item">
+  <span class="rc-pipeline-num">02</span>
+  <div class="rc-pipeline-info">
+    <span class="rc-pipeline-name">Merge Context & Chained Variables</span>
+    <span class="rc-pipeline-sub">Combines environment entries with runtime capture store</span>
+  </div>
+</div>
+<div class="rc-pipeline-step-item">
+  <span class="rc-pipeline-num">03</span>
+  <div class="rc-pipeline-info">
+    <span class="rc-pipeline-name">Substitute Template Placeholders</span>
+    <span class="rc-pipeline-sub">Expands &#123;&#123;VAR&#125;&#125; in params, query, body & headers</span>
+  </div>
+</div>
+<div class="rc-pipeline-step-item">
+  <span class="rc-pipeline-num">04</span>
+  <div class="rc-pipeline-info">
+    <span class="rc-pipeline-name">Generate Dynamic Test Data</span>
+    <span class="rc-pipeline-sub">Computes fresh values for &#123;&#123;$uuid&#125;&#125;, &#123;&#123;$timestamp&#125;&#125;, &#123;&#123;$randomEmail&#125;&#125;</span>
+  </div>
+</div>
+<div class="rc-pipeline-step-item">
+  <span class="rc-pipeline-num">05</span>
+  <div class="rc-pipeline-info">
+    <span class="rc-pipeline-name">Construct WHATWG URL & Merge Headers</span>
+    <span class="rc-pipeline-sub">Encodes path & query parameters safely; cascades headers (File &lt; Endpoint &lt; Case)</span>
+  </div>
+</div>
+<div class="rc-pipeline-step-item">
+  <span class="rc-pipeline-num">06</span>
+  <div class="rc-pipeline-info">
+    <span class="rc-pipeline-name">Dispatch HTTP/HTTPS Socket</span>
+    <span class="rc-pipeline-sub">Transmits payload via native Node.js client with timeout & size safety guards</span>
+  </div>
+</div>
+<div class="rc-pipeline-step-item">
+  <span class="rc-pipeline-num">07</span>
+  <div class="rc-pipeline-info">
+    <span class="rc-pipeline-name">Evaluate Multi-Level Assertions</span>
+    <span class="rc-pipeline-sub">Validates status code, bodyContains, bodyEquals, headers, and maxDurationMs SLA</span>
+  </div>
+</div>
+<div class="rc-pipeline-step-item">
+  <span class="rc-pipeline-num">08</span>
+  <div class="rc-pipeline-info">
+    <span class="rc-pipeline-name">Extract & Store Captured Tokens</span>
+    <span class="rc-pipeline-sub">Extracts JSON properties via dot notation into shared session context</span>
+  </div>
+</div>
+<div class="rc-pipeline-step-item">
+  <span class="rc-pipeline-num">09</span>
+  <div class="rc-pipeline-info">
+    <span class="rc-pipeline-name">Emit Synchronous Results</span>
+    <span class="rc-pipeline-sub">Updates inline CodeLens badges, Activity Bar tree view, and Webview results panel</span>
+  </div>
+</div>
+</div>
 
 ---
 

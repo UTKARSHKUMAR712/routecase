@@ -521,3 +521,306 @@
   color: #34D399;
 }
 
+/* =====================================================================
+   Core Capabilities 3-Pillar Component (Replaces ASCII Box)
+   ===================================================================== */
+.rc-capability-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+@media (max-width: 900px) {
+  .rc-capability-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rc-capability-card {
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+}
+
+.dark .rc-capability-card {
+  background: #111723;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.rc-capability-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.12);
+}
+
+.rc-cap-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--vp-c-border);
+}
+
+.dark .rc-cap-header {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.rc-cap-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--vp-c-brand-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dark .rc-cap-icon {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34D399;
+}
+
+.rc-cap-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+  margin: 0 !important;
+}
+
+.rc-cap-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rc-cap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--vp-c-text-2);
+  line-height: 1.5;
+}
+
+.rc-cap-dot {
+  color: var(--vp-c-brand-1);
+  font-weight: 700;
+  margin-top: -1px;
+}
+
+/* =====================================================================
+   Layered Architecture Stack Component (Replaces ASCII Architecture)
+   ===================================================================== */
+.rc-arch-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.rc-arch-layer {
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  position: relative;
+}
+
+.dark .rc-arch-layer {
+  background: #111723;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.rc-arch-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--vp-c-brand-1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dark .rc-arch-title {
+  color: #34D399;
+}
+
+.rc-arch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.rc-arch-item {
+  background: var(--vp-c-bg-soft);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.86rem;
+  color: var(--vp-c-text-1);
+  border: 1px solid var(--vp-c-border);
+  font-family: var(--vp-font-family-mono);
+}
+
+.dark .rc-arch-item {
+  background: #0B0F17;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.rc-arch-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.78rem;
+  color: var(--vp-c-brand-1);
+  padding: 4px 0;
+}
+
+.dark .rc-arch-connector {
+  color: #34D399;
+}
+
+/* =====================================================================
+   9-Step Request Lifecycle Component (Replaces ASCII Lifecycle)
+   ===================================================================== */
+.rc-pipeline-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 2rem 0;
+}
+
+.rc-pipeline-step-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 10px;
+  padding: 0.85rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.dark .rc-pipeline-step-item {
+  background: #111723;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.rc-pipeline-step-item:hover {
+  border-color: var(--vp-c-brand-1);
+  transform: translateX(4px);
+}
+
+.rc-pipeline-num {
+  font-family: var(--vp-font-family-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--vp-c-brand-1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.dark .rc-pipeline-num {
+  color: #34D399;
+}
+
+.rc-pipeline-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.rc-pipeline-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.rc-pipeline-sub {
+  font-size: 0.82rem;
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+}
+
+/* =====================================================================
+   Variable Precedence Hierarchy Component (Replaces ASCII Hierarchy)
+   ===================================================================== */
+.rc-precedence-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 2rem 0;
+}
+
+.rc-prec-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.dark .rc-prec-item {
+  background: #111723;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.rc-prec-item:first-child {
+  border-left: 4px solid var(--vp-c-brand-1);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+}
+
+.rc-prec-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rc-prec-badge {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--vp-c-brand-1);
+}
+
+.dark .rc-prec-badge {
+  color: #34D399;
+}
+
+.rc-prec-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.rc-prec-rank {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.78rem;
+  color: var(--vp-c-text-3);
+}
+
+

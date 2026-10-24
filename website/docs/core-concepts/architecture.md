@@ -4,29 +4,37 @@ RouteCase is built with a modular, lightweight TypeScript architecture designed 
 
 ---
 
-## High-Level Architecture Diagram
+## High-Level Architecture
 
-```
- ┌─────────────────────────────────────────────────────────────┐
- │                      VS Code Front-End                      │
- ├───────────────────────────────┬─────────────────────────────┤
- │ • CodeLens Provider & Scanner │ • Activity Bar Tree Provider│
- │ • Webview Results Panel       │ • Context Menu (Copy cURL)  │
- └──────────────┬────────────────┴──────────────┬──────────────┘
-                │                               │
-                ▼                               ▼
- ┌─────────────────────────────────────────────────────────────┐
- │                    RouteCase Core Engine                    │
- ├───────────────────────────────┬─────────────────────────────┤
- │ 1. Parser & Schema Validator  │ 2. Template & URL Expander  │
- │ 3. Environment Resolver (.env)│ 4. Variable Chaining Store  │
- │ 5. Dynamic Built-in Generators│ 6. Secret Redactor          │
- │ 7. Assertion Evaluator        │ 8. HTTP/HTTPS Executor      │
- └───────────────────────────────┴─────────────────────────────┘
-                │
-                ▼
-      Target HTTP/HTTPS API (Localhost / Remote)
-```
+<div v-pre class="rc-arch-stack">
+<div class="rc-arch-layer">
+  <div class="rc-arch-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Layer 1: VS Code Front-End & Extensibility UI</div>
+  <div class="rc-arch-grid">
+    <div class="rc-arch-item">CodeLens Provider & Scanner</div>
+    <div class="rc-arch-item">Activity Bar Tree Provider</div>
+    <div class="rc-arch-item">Webview Results Panel (XSS-safe)</div>
+    <div class="rc-arch-item">cURL Generator & Context Menus</div>
+  </div>
+</div>
+<div class="rc-arch-connector">▼ &nbsp; Dispatches In-Memory Events & Commands</div>
+<div class="rc-arch-layer">
+  <div class="rc-arch-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg> Layer 2: RouteCase Core Execution Engine (Node.js)</div>
+  <div class="rc-arch-grid">
+    <div class="rc-arch-item">1. Parser & Schema Validator</div>
+    <div class="rc-arch-item">2. Template & URL Expander</div>
+    <div class="rc-arch-item">3. Environment Resolver (.env)</div>
+    <div class="rc-arch-item">4. Variable Chaining Store</div>
+    <div class="rc-arch-item">5. Dynamic Generators ({{$uuid}})</div>
+    <div class="rc-arch-item">6. Secret Redaction Engine</div>
+    <div class="rc-arch-item">7. Multi-Level Assertion Evaluator</div>
+    <div class="rc-arch-item">8. HTTP/HTTPS Native Socket Client</div>
+  </div>
+</div>
+<div class="rc-arch-connector">▼ &nbsp; Zero-Dependency HTTP / HTTPS Network Sockets</div>
+<div class="rc-arch-layer" style="border-style: dashed;">
+  <div class="rc-arch-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> Target API (Localhost :3000 / Docker / LAN / Remote Web API)</div>
+</div>
+</div>
 
 ---
 

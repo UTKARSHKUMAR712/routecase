@@ -19,17 +19,36 @@ RouteCase uses curly brace syntax:
 
 When evaluating a `{{...}}` variable expression, RouteCase resolves values in strict order:
 
-```text
- ┌────────────────────────────────────────────────────────┐
- │ 1. Captured Variables from earlier test cases (capture)│  Highest Precedence
- ├────────────────────────────────────────────────────────┤
- │ 2. Environment Variables (.rcase.env, .rcase.env.json) │
- ├────────────────────────────────────────────────────────┤
- │ 3. VS Code Settings (routecase.env)                    │
- ├────────────────────────────────────────────────────────┤
- │ 4. Dynamic Built-in Generators ({{$uuid}}, {{$isoDate}})│ Lowest Precedence
- └────────────────────────────────────────────────────────┘
-```
+<div class="rc-precedence-stack">
+<div class="rc-prec-item">
+  <div class="rc-prec-info">
+    <span class="rc-prec-badge">Priority 1</span>
+    <span class="rc-prec-name">Captured Runtime Variables (<code>capture</code>)</span>
+  </div>
+  <span class="rc-prec-rank">Highest Precedence</span>
+</div>
+<div class="rc-prec-item">
+  <div class="rc-prec-info">
+    <span class="rc-prec-badge">Priority 2</span>
+    <span class="rc-prec-name">Workspace Environment Files (<code>.rcase.env</code>, <code>.rcase.env.json</code>)</span>
+  </div>
+  <span class="rc-prec-rank">Precedence 2</span>
+</div>
+<div class="rc-prec-item">
+  <div class="rc-prec-info">
+    <span class="rc-prec-badge">Priority 3</span>
+    <span class="rc-prec-name">VS Code Workspace Settings (<code>routecase.env</code>)</span>
+  </div>
+  <span class="rc-prec-rank">Precedence 3</span>
+</div>
+<div class="rc-prec-item">
+  <div class="rc-prec-info">
+    <span class="rc-prec-badge">Priority 4</span>
+    <span class="rc-prec-name">Dynamic Built-in Generators (<code>{{$uuid}}</code>, <code>{{$isoDate}}</code>, <code>{{$randomEmail}}</code>)</span>
+  </div>
+  <span class="rc-prec-rank">Fallback Precedence</span>
+</div>
+</div>
 
 1. **Captured Variables (`capture`):** If an earlier test case extracted a token named `authToken`, `{{authToken}}` will take top priority.
 2. **Environment Files (`.rcase.env` / `.rcase.env.json`):** Workspace environment files are evaluated next.

@@ -1,43 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
   <!--
     RouteCase Activity Bar Icon
-    "R" with highway road dashes — matches the RouteCase brand mark.
-    Uses currentColor so VS Code themes (light/dark/high-contrast) apply automatically.
+    3-Node Connected Route Graph matching the official RouteCase topology mark.
+    Uses currentColor and calibrated opacities so VS Code themes (dark, light, high-contrast) apply automatically.
   -->
+  <!-- Connecting line: Top-left node to Right hub node -->
+  <line x1="8" y1="7.5" x2="17" y2="12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity="0.8" />
 
-  <!-- Vertical stem of R -->
-  <line x1="5" y1="3.5" x2="5" y2="20.5"
-        stroke="currentColor" stroke-width="2"
-        stroke-linecap="round"/>
+  <!-- Connecting line: Bottom-left node to Right hub node -->
+  <line x1="6.5" y1="17" x2="17" y2="12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity="0.8" />
 
-  <!-- Top horizontal crossbar of R -->
-  <line x1="5" y1="3.5" x2="13" y2="3.5"
-        stroke="currentColor" stroke-width="2"
-        stroke-linecap="round"/>
+  <!-- Top-left node -->
+  <circle cx="8" cy="7.5" r="3.2" fill="currentColor" />
 
-  <!-- Right curve of R arch (quarter-circle) -->
-  <path d="M13 3.5 Q17.5 3.5 17.5 8 Q17.5 12.5 13 12.5"
-        stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Bottom-left node -->
+  <circle cx="6.5" cy="17" r="3.2" fill="currentColor" />
 
-  <!-- Middle bar connecting arch back to stem -->
-  <line x1="5" y1="12.5" x2="13" y2="12.5"
-        stroke="currentColor" stroke-width="2"
-        stroke-linecap="round"/>
-
-  <!-- Diagonal leg of R -->
-  <line x1="11" y1="12.5" x2="19" y2="20.5"
-        stroke="currentColor" stroke-width="2"
-        stroke-linecap="round"/>
-
-  <!-- Highway road dashes inside the R bowl (3 small dashes in a column) -->
-  <line x1="8.5" y1="5.5"  x2="8.5" y2="6.8"
-        stroke="currentColor" stroke-width="1.1"
-        stroke-linecap="round" opacity="0.65"/>
-  <line x1="8.5" y1="7.8"  x2="8.5" y2="9.1"
-        stroke="currentColor" stroke-width="1.1"
-        stroke-linecap="round" opacity="0.65"/>
-  <line x1="8.5" y1="10.1" x2="8.5" y2="11.4"
-        stroke="currentColor" stroke-width="1.1"
-        stroke-linecap="round" opacity="0.65"/>
+  <!-- Right hub node (prominent destination) -->
+  <circle cx="17" cy="12" r="4.2" fill="currentColor" />
 </svg>
