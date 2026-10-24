@@ -11,253 +11,294 @@
 [![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/UtkarshKumar.routecase)](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**RouteCase** is a modern, lightweight Visual Studio Code extension designed for developers who build and test HTTP APIs. 
+**RouteCase** is a modern, lightweight VS Code extension for testing HTTP APIs — directly from your editor. No browser, no external app, no accounts.
 
-Instead of manually sending repetitive HTTP requests or maintaining bloated Postman collections, RouteCase lets you **define an API endpoint once** and run multiple input cases against it using different parameters, bodies, and assertions.
-
----
-
-## Key Features
-
-- **Declarative `.rcase` Format:** Define your base URL, endpoint path template, and test cases in a single structured JSON file.
-- **Inline Cell Actions (Jupyter-Style):** Click `▶ Run All Cases`, `▶ Run Endpoint`, or `▶ Run Case` directly inside your `.rcase` file above any test case, with live inline status badges (`✓ PASS 200 • 35ms`).
-- **Independent Case Expansion:** One endpoint with 1 success case and 3 error cases automatically produces 4 independent test runs.
-- **Safe Path Parameter Substitution:** Safely expands path placeholders like `/api/info/{name}` with full URL encoding.
-- **Built-in Assertions:** Validate expected HTTP status codes, `bodyContains` text matches, `bodyEquals` deep JSON equality, response headers, and duration thresholds.
-- **Native VS Code Tree View:** Real-time test explorer in the Activity Bar showing PASS, FAIL, ERROR, and RUNNING states with execution durations.
-- **Rich Results Panel:** Interactive Webview panel displaying full request details, redacted headers, response previews, and assertion comparisons.
-- **Zero Configuration & Security-First:** No accounts, no cloud sync, no external backend, and automatic redaction of secrets (`Authorization`, `Cookie`, `x-api-key`).
+Define your API endpoints once in a `.rcase` file, run every input case with one click, and see instant PASS / FAIL results right inside VS Code — just like Jupyter Notebook cells for your API routes.
 
 ---
 
-## Interactive Jupyter-Style Inline Execution
+## ✨ Key Features
 
-Whenever you open a `.rcase` file, RouteCase renders clickable **CodeLens actions directly inside the editor**:
-
-```json
-// [▶ Run All Cases]  [📊 Results Dashboard]
-{
-  "baseUrl": "http://localhost:3000",
-  "tests": [
-    // [▶ Run Endpoint (Get superhero by name)]
-    {
-      "name": "Get superhero by name",
-      "method": "GET",
-      "path": "/api/info/{name}",
-      "success": [
-        // [▶ Run Case]  [✓ PASS (200 • 45ms)]
-        {
-          "name": "Find Batman",
-          "params": { "name": "Batman" },
-          "expect": {
-            "status": 200,
-            "bodyContains": "Batman"
-          }
-        }
-      ],
-      "errors": [
-        // [▶ Run Case]
-        {
-          "name": "Unknown superhero",
-          "params": { "name": "UnknownHero123" },
-          "expect": { "status": 404 }
-        }
-      ]
-    }
-  ]
-}
-```
-
-- Click **`▶ Run All Cases`** at the top to execute the full suite.
-- Click **`▶ Run Endpoint (...)`** to execute all success & error cases for that route.
-- Click **`▶ Run Case`** above any individual scenario to run only that test case in isolation (just like a Jupyter notebook cell!).
-- Click the live **`✓ PASS`** or **`✗ FAIL`** badge next to the test case to instantly reveal its diagnostic headers, body preview, and assertion breakdown.
+| Feature | Description |
+| :--- | :--- |
+| **📄 Declarative `.rcase` Format** | Define base URL, endpoints, and all test cases in structured JSON. IntelliSense and schema validation included. |
+| **▶ Jupyter-Style Inline Execution** | Click `▶ Run All Cases`, `▶ Run Endpoint`, or `▶ Run Case` directly above each test — live `✓ PASS` / `✗ FAIL` badges update in-place. |
+| **🔁 All HTTP Methods** | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS` — fully supported. |
+| **🔗 Response Token Chaining** | Capture values from one response (`accessToken`, `userId`) and automatically inject them into all subsequent requests. |
+| **🌍 Environment Variables** | Use `{{VAR_NAME}}` placeholders resolved from `.rcase.env`, `.rcase.env.json`, or VS Code settings. Switch between local / staging / production without touching test files. |
+| **⚡ Dynamic Built-in Variables** | `{{$uuid}}`, `{{$timestamp}}`, `{{$randomEmail}}`, `{{$randomName}}`, `{{$randomInt}}`, `{{$isoDate}}` — fresh values generated on every run. |
+| **📋 Copy as cURL** | Right-click any test case → copy a ready-to-run cURL command to your clipboard. |
+| **📥 OpenAPI / Swagger Import** | Import any OpenAPI 3.x or Swagger 2.x JSON spec and auto-generate a full `.rcase` test suite. |
+| **🔍 Full Assertions Engine** | `status`, `bodyContains`, `bodyEquals` (deep JSON), response `headers`, `maxDurationMs` latency SLA. |
+| **🌲 Activity Bar Explorer** | Real-time test tree showing PASS, FAIL, ERROR, RUNNING states with elapsed durations. |
+| **🔒 Security-First** | Auto-redacts `Authorization`, `Cookie`, `x-api-key` in all logs and results panels. No telemetry, no cloud sync. |
 
 ---
 
-## 🌟 The All-Included Master Example (`all-features.rcase`)
+## 🚀 The Complete Master Example (All Features in One File)
 
-Here is a complete, production-grade `.rcase` definition demonstrating **every single capability** of RouteCase in one file:
+This single `.rcase` file demonstrates **every RouteCase capability** — environment variables, dynamic values, token chaining, all HTTP methods, and all assertion types:
 
 ```json
 {
   "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
-  "name": "Comprehensive RouteCase Showcase Suite (All Features)",
-  "baseUrl": "https://api.example.com",
+  "name": "RouteCase — Complete Feature Showcase v0.2.0",
+  "baseUrl": "{{API_BASE_URL}}",
   "headers": {
     "Accept": "application/json",
-    "User-Agent": "RouteCase-TestRunner/0.1.0"
+    "x-api-key": "{{API_KEY}}",
+    "User-Agent": "RouteCase/0.2.0"
   },
   "tests": [
+
     {
-      "name": "Create new product item",
-      "method": "POST",
-      "path": "/api/v1/products",
-      "headers": {
-        "Content-Type": "application/json",
-        "x-api-key": "test-api-key-9988"
-      },
+      "name": "1. Health Check (GET — no auth)",
+      "method": "GET",
+      "path": "/health",
       "success": [
         {
-          "name": "Standard product creation",
-          "description": "Verifies 201 Created with generated title, headers, and strict latency SLA",
+          "name": "Server is healthy",
+          "expect": {
+            "status": 200,
+            "bodyContains": "ok",
+            "maxDurationMs": 300
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "2. Login & Capture Token (POST + capture)",
+      "method": "POST",
+      "path": "/auth/login",
+      "success": [
+        {
+          "name": "Login and store accessToken for later requests",
+          "description": "The 'capture' block extracts values from the response body. {{authToken}} and {{authUserId}} are now available to ALL subsequent test cases in this file.",
           "body": {
-            "title": "Ergonomic Mechanical Keyboard",
-            "price": 149.99,
-            "currency": "USD",
-            "category": "Electronics",
-            "inStock": true,
-            "tags": ["hardware", "keyboard", "usb-c"]
+            "username": "tester_{{$randomInt}}",
+            "password": "my-secure-password"
+          },
+          "capture": {
+            "authToken": "accessToken",
+            "authUserId": "userId"
           },
           "expect": {
-            "status": 201,
-            "bodyContains": "Ergonomic Mechanical Keyboard",
+            "status": 200,
+            "bodyContains": "accessToken",
             "headers": {
               "content-type": "application/json"
             },
-            "maxDurationMs": 450
+            "maxDurationMs": 500
           }
         }
       ],
       "errors": [
         {
-          "name": "Validation error on negative price",
-          "description": "Ensure negative price triggers a 422 Unprocessable response",
+          "name": "Wrong password returns 401",
           "body": {
-            "title": "Invalid Price Item",
-            "price": -25.0,
-            "category": "Electronics"
+            "username": "admin",
+            "password": "wrong-password"
           },
           "expect": {
-            "status": 422,
-            "bodyContains": "Price must be greater than zero"
+            "status": 401,
+            "bodyContains": "Invalid credentials"
           }
         },
         {
-          "name": "Missing required title",
-          "description": "Payload without title field returns 400 Bad Request",
+          "name": "Missing username returns 400",
           "body": {
-            "price": 29.99
+            "password": "some-password"
           },
           "expect": {
-            "status": 400,
-            "bodyContains": "title is required"
+            "status": 400
           }
         }
       ]
     },
+
     {
-      "name": "Search & filter catalog with query parameters",
-      "method": "GET",
-      "path": "/api/v1/products/search?category={category}&minPrice={minPrice}&inStock={inStock}",
+      "name": "3. Create User (POST + dynamic variables + capture)",
+      "method": "POST",
+      "path": "/users",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}",
+        "Content-Type": "application/json"
+      },
       "success": [
         {
-          "name": "Search electronics in stock",
-          "description": "Safe query parameter substitution with spaces, special characters, and pagination",
-          "params": {
-            "category": "Computers & Laptops",
-            "minPrice": 50,
-            "inStock": true
+          "name": "Register a unique user every run",
+          "description": "{{$randomEmail}} generates a new email each run — no more 'duplicate email' 409 Conflict errors. {{$uuid}} creates a collision-free ID. {{$isoDate}} stamps the creation time.",
+          "body": {
+            "id": "{{$uuid}}",
+            "name": "{{$randomName}}",
+            "email": "{{$randomEmail}}",
+            "role": "developer",
+            "createdAt": "{{$isoDate}}"
           },
-          "query": {
-            "page": 1,
-            "limit": 25,
-            "sort": "price_asc"
+          "capture": {
+            "createdUserId": "id"
           },
           "expect": {
-            "status": 200,
-            "bodyContains": "results",
+            "status": 201,
+            "bodyContains": "id",
+            "headers": {
+              "content-type": "application/json"
+            },
             "maxDurationMs": 600
           }
         }
       ],
       "errors": [
         {
-          "name": "Invalid pagination page number",
-          "params": {
-            "category": "Electronics",
-            "minPrice": 0,
-            "inStock": true
-          },
-          "query": {
-            "page": -1,
-            "limit": 10
+          "name": "Duplicate email returns 409",
+          "body": {
+            "email": "existing@example.com",
+            "name": "Duplicate User"
           },
           "expect": {
-            "status": 400,
-            "bodyContains": "page must be positive integer"
+            "status": 409,
+            "bodyContains": "already exists"
+          }
+        },
+        {
+          "name": "Missing required email returns 422",
+          "body": {
+            "name": "No Email User"
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "email is required"
           }
         }
       ]
     },
+
     {
-      "name": "Fetch product by path ID template",
+      "name": "4. Get User by ID (GET + path param + chained variable)",
       "method": "GET",
-      "path": "/api/v1/products/{id}",
+      "path": "/users/{id}",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}"
+      },
       "success": [
         {
-          "name": "Fetch existing product (id: prod_101)",
+          "name": "Fetch the user we just created using {{createdUserId}}",
+          "description": "{{createdUserId}} was captured from the POST /users response above. No copy-paste required.",
           "params": {
-            "id": "prod_101"
+            "id": "{{createdUserId}}"
           },
           "expect": {
             "status": 200,
-            "bodyContains": "prod_101",
+            "bodyContains": "email",
             "maxDurationMs": 250
           }
         }
       ],
       "errors": [
         {
-          "name": "Product not found",
+          "name": "Non-existent user returns 404 with exact JSON body",
           "params": {
-            "id": "prod_nonexistent_9999"
+            "id": "usr_does_not_exist_99999"
           },
           "expect": {
             "status": 404,
             "bodyEquals": {
-              "error": "NotFound",
-              "message": "Product with ID prod_nonexistent_9999 does not exist"
+              "error": "Not Found",
+              "message": "User not found"
             }
           }
         }
       ]
     },
+
     {
-      "name": "Partial update product stock & price",
-      "method": "PATCH",
-      "path": "/api/v1/products/{id}",
+      "name": "5. List Users with Pagination (GET + query params)",
+      "method": "GET",
+      "path": "/users",
       "headers": {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer sample-jwt-access-token"
+        "Authorization": "Bearer {{authToken}}"
       },
       "success": [
         {
-          "name": "Discount price adjustment",
-          "params": {
-            "id": "prod_101"
-          },
-          "body": {
-            "price": 129.99,
-            "onSale": true
+          "name": "Fetch first page of users",
+          "query": {
+            "page": 1,
+            "limit": 10,
+            "sort": "createdAt",
+            "order": "desc"
           },
           "expect": {
             "status": 200,
-            "bodyContains": "129.99"
+            "bodyContains": "users",
+            "maxDurationMs": 400
+          }
+        },
+        {
+          "name": "Search users by role filter",
+          "query": {
+            "role": "developer",
+            "page": 1,
+            "limit": 5
+          },
+          "expect": {
+            "status": 200
           }
         }
       ],
       "errors": [
         {
-          "name": "Unauthorized update attempt without valid token",
+          "name": "Negative page number returns 400",
+          "query": {
+            "page": -1,
+            "limit": 10
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "page must be"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "6. Full Replace User (PUT)",
+      "method": "PUT",
+      "path": "/users/{id}",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}",
+        "Content-Type": "application/json"
+      },
+      "success": [
+        {
+          "name": "Replace user profile completely",
           "params": {
-            "id": "prod_101"
+            "id": "{{createdUserId}}"
+          },
+          "body": {
+            "name": "{{$randomName}}",
+            "email": "{{$randomEmail}}",
+            "role": "admin",
+            "updatedAt": "{{$isoDate}}"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "admin"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Unauthorized PUT without token",
+          "params": {
+            "id": "{{createdUserId}}"
           },
           "headers": {
             "Authorization": "Bearer expired-or-invalid-token"
           },
           "body": {
-            "price": 10.0
+            "name": "Hacker",
+            "email": "hacker@evil.com"
           },
           "expect": {
             "status": 401,
@@ -266,32 +307,121 @@ Here is a complete, production-grade `.rcase` definition demonstrating **every s
         }
       ]
     },
+
     {
-      "name": "Delete obsolete product (Admin only)",
-      "method": "DELETE",
-      "path": "/api/v1/products/{id}",
+      "name": "7. Partial Update User (PATCH)",
+      "method": "PATCH",
+      "path": "/users/{id}",
       "headers": {
-        "Authorization": "Bearer admin-super-secret-token"
+        "Authorization": "Bearer {{authToken}}",
+        "Content-Type": "application/json"
       },
       "success": [
         {
-          "name": "Delete discontinued product",
+          "name": "Update only the user's role",
           "params": {
-            "id": "prod_legacy_404"
+            "id": "{{createdUserId}}"
+          },
+          "body": {
+            "role": "moderator"
           },
           "expect": {
-            "status": 204
+            "status": 200,
+            "bodyContains": "moderator"
           }
         }
       ],
       "errors": [
         {
-          "name": "Forbidden for non-admin accounts",
+          "name": "PATCH on non-existent user returns 404",
           "params": {
-            "id": "prod_legacy_404"
+            "id": "usr_ghost_0000"
+          },
+          "body": {
+            "role": "admin"
+          },
+          "expect": {
+            "status": 404
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "8. Create Product (POST + UUID body field)",
+      "method": "POST",
+      "path": "/products",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}",
+        "Content-Type": "application/json"
+      },
+      "success": [
+        {
+          "name": "Create product with dynamic UUID and random price suffix",
+          "body": {
+            "productId": "{{$uuid}}",
+            "sku": "SKU-{{$randomInt}}",
+            "name": "Premium Gadget {{$randomInt}}",
+            "price": 49.99,
+            "currency": "USD",
+            "inStock": true,
+            "tags": ["electronics", "new-arrival"],
+            "createdAt": "{{$timestamp}}"
+          },
+          "capture": {
+            "createdProductId": "productId"
+          },
+          "expect": {
+            "status": 201,
+            "bodyContains": "productId",
+            "maxDurationMs": 500
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Negative price returns 422",
+          "body": {
+            "productId": "{{$uuid}}",
+            "name": "Bad Product",
+            "price": -10.00
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "Price must be"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "9. Delete User (DELETE — uses chained ID)",
+      "method": "DELETE",
+      "path": "/users/{id}",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}"
+      },
+      "success": [
+        {
+          "name": "Delete the user we created and updated above",
+          "description": "{{createdUserId}} flows all the way from Step 3 (POST /users capture) through to this final cleanup step.",
+          "params": {
+            "id": "{{createdUserId}}"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "deleted"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Forbidden: non-admin cannot delete another user",
+          "params": {
+            "id": "{{createdUserId}}"
           },
           "headers": {
-            "Authorization": "Bearer standard-customer-token"
+            "Authorization": "Bearer standard-user-token"
           },
           "expect": {
             "status": 403,
@@ -300,99 +430,48 @@ Here is a complete, production-grade `.rcase` definition demonstrating **every s
         }
       ]
     }
+
   ]
 }
 ```
 
-### What This Example Showcases:
-| Feature | Implementation in Example |
-| :--- | :--- |
-| **All HTTP Methods** | Demonstrates `GET`, `POST`, `PATCH`, and `DELETE`. |
-| **Path Placeholders** | `/api/v1/products/{id}` dynamically replaced from `params: { "id": "prod_101" }`. |
-| **Query Parameters** | Combined template (`?category={category}`) + `query: { "page": 1, "limit": 25 }`. |
-| **Nested JSON Bodies** | Complex payload with objects, numbers, booleans, and arrays. |
-| **Status Assertions** | Validates `200 OK`, `201 Created`, `204 No Content`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, and `422 Unprocessable`. |
-| **Substring Assertions** | `bodyContains`: checks for key strings in response body. |
-| **Deep JSON Equality** | `bodyEquals`: compares structured JSON objects for exact match. |
-| **Header Assertions** | `headers`: validates expected response headers like `content-type`. |
-| **Latency SLA Benchmark** | `maxDurationMs`: fails if the endpoint takes longer than specified milliseconds (e.g. 250ms). |
-| **Automatic Secret Redaction** | Headers like `Authorization` and `x-api-key` are automatically redacted with `[REDACTED]` in reports. |
+### Feature Coverage Map
+
+| Step | HTTP Method | Feature Demonstrated |
+| :---: | :---: | :--- |
+| 1 | `GET` | Status assertion, `maxDurationMs` latency SLA |
+| 2 | `POST` | **Token Capture** (`capture` → `{{authToken}}`), body, header assertions |
+| 3 | `POST` | **Dynamic Variables** (`{{$uuid}}`, `{{$randomEmail}}`, `{{$randomName}}`, `{{$isoDate}}`), cascade capture |
+| 4 | `GET` | **Chained path param** (`{{createdUserId}}`), `bodyEquals` deep JSON comparison |
+| 5 | `GET` | **Query parameters** (pagination, filter, sort), multiple success cases |
+| 6 | `PUT` | Full resource replacement, 401 unauthorized error case |
+| 7 | `PATCH` | Partial update, 404 error case |
+| 8 | `POST` | `{{$uuid}}` in body field, `{{$timestamp}}` epoch, nested arrays |
+| 9 | `DELETE` | Chained variable flows all the way from step 3, 403 forbidden error |
 
 ---
 
-## 📚 Bundled Examples Library
+## ⚡ Interactive Jupyter-Style Inline Execution
 
-RouteCase includes 7 real-world test suites ready to explore:
-
-| Example File | Scenario & Purpose |
-| :--- | :--- |
-| **`all-features.rcase`** | **Master Showcase:** Every feature, HTTP method, parameter type, and assertion. |
-| **`github-public-api.rcase`** | **Live Public API:** Tests live `api.github.com` endpoints (run instantly without localhost!). |
-| **`ecommerce-crud.rcase`** | **Store API:** Products catalog, cart line items, orders checkout, and tracking. |
-| **`auth-and-security.rcase`** | **Authentication & RBAC:** Login JWTs, Bearer auth, expired tokens, and 401/403 security checks. |
-| **`superheroes.rcase`** | **Quick Start:** Classic path-parameter expansion with success and error cases. |
-| **`users-api.rcase`** | **RESTful Users:** User CRUD, query string filtering, pagination, and data validation. |
-| **`error-handling.rcase`** | **Edge Cases & Diagnostics:** Simulated server errors, timeouts, and edge cases. |
-
-> **Tip:** Press `Ctrl+Shift+P` (or `Cmd+Shift+P`) > run **`RouteCase: Create Example Test File`** to pick and create any of these templates directly inside your project!
-
----
-
-## Quick Start
-
-### 1. Create a `.rcase` Test File
-
-Create a file named `superheroes.rcase` (or run command `RouteCase: Create Example Test File`):
+Open any `.rcase` file and click the floating actions that appear above each test:
 
 ```json
+// ▶ Run All Cases   📊 Results Dashboard
 {
-  "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
-  "name": "Superhero API Test Suite",
-  "baseUrl": "http://localhost:3000",
+  "baseUrl": "{{API_BASE_URL}}",
   "tests": [
+    // ▶ Run Endpoint (Login & Capture Token)
     {
-      "name": "Get superhero by name",
-      "method": "GET",
-      "path": "/api/info/{name}",
+      "name": "Login & Capture Token",
+      "method": "POST",
+      "path": "/auth/login",
       "success": [
+        // ▶ Run Case   ✓ PASS (200 • 42ms)   📋 Captured: authToken, authUserId
         {
-          "name": "Find Batman",
-          "params": {
-            "name": "Batman"
-          },
-          "expect": {
-            "status": 200,
-            "bodyContains": "Batman"
-          }
-        }
-      ],
-      "errors": [
-        {
-          "name": "Unknown superhero",
-          "params": {
-            "name": "UnknownHero123"
-          },
-          "expect": {
-            "status": 404
-          }
-        },
-        {
-          "name": "Invalid name rat",
-          "params": {
-            "name": "rat"
-          },
-          "expect": {
-            "status": 404
-          }
-        },
-        {
-          "name": "Invalid name king",
-          "params": {
-            "name": "king"
-          },
-          "expect": {
-            "status": 404
-          }
+          "name": "Login and store access token",
+          "body": { "username": "admin", "password": "secret" },
+          "capture": { "authToken": "accessToken" },
+          "expect": { "status": 200 }
         }
       ]
     }
@@ -400,62 +479,269 @@ Create a file named `superheroes.rcase` (or run command `RouteCase: Create Examp
 }
 ```
 
-### 2. Run the Tests
-
-- Click **`▶ Run All Cases`** directly at the top of the file.
-- Or click **`▶ Run Case`** above any specific test scenario.
-- Or click the **Play** icon in the editor title bar.
-- Or press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) and run `RouteCase: Run Tests in Current File`.
-- Or click the **RouteCase** icon in the VS Code Activity Bar on the left.
+- **`▶ Run All Cases`** — runs the entire file in sequence, chaining captured variables between steps.
+- **`▶ Run Endpoint`** — runs all success + error cases for a single route.
+- **`▶ Run Case`** — runs exactly one case in isolation (like a Jupyter cell).
+- **`✓ PASS`** / **`✗ FAIL`** badges — click to open the full diagnostic panel.
+- **`📋 Captured: authToken`** — shows which variables were captured for downstream use.
 
 ---
 
-## How It Works
+## 🌍 Environment Variables (`.rcase.env`)
 
-### Path Template Substitution
-Placeholders wrapped in curly braces (`{key}`) are matched against the test case's `params` object:
+Create a `.rcase.env` file in your project root (add to `.gitignore`!):
 
-* **Template:** `/api/users/{userId}/posts/{postId}`
-* **Params:** `{ "userId": "admin", "postId": 42 }`
-* **Resolved Request:** `GET http://localhost:3000/api/users/admin/posts/42`
+```env
+API_BASE_URL=http://localhost:4000
+API_KEY=my-dev-secret-key-123
+ADMIN_USER_ID=usr_admin_001
+DB_SEED_TOKEN=seed-token-for-tests
+```
 
-Each parameter value is safely URL-encoded. If a placeholder is missing in a test case, RouteCase stops before sending network requests and flags an informative validation error.
-
-### Query Parameters
-You can also specify query parameters using the optional `query` dictionary:
+Or use JSON format (`.rcase.env.json`):
 
 ```json
 {
-  "name": "Filter active users",
-  "query": {
-    "status": "active",
-    "limit": 10
-  },
-  "expect": {
-    "status": 200
-  }
+  "API_BASE_URL": "https://staging-api.myapp.com",
+  "API_KEY": "staging-key-abc",
+  "ADMIN_USER_ID": "usr_staging_admin"
 }
 ```
 
-### POST / PUT / PATCH Requests with Body
-For state-changing requests, specify the `body` field (as JSON or string):
+Then use `{{VAR_NAME}}` anywhere in your `.rcase` file:
 
 ```json
 {
-  "name": "Create new superhero",
-  "method": "POST",
-  "path": "/api/heroes",
-  "success": [
+  "baseUrl": "{{API_BASE_URL}}",
+  "headers": {
+    "x-api-key": "{{API_KEY}}"
+  },
+  "tests": [
     {
-      "name": "Add Flash",
-      "body": {
-        "name": "The Flash",
-        "alterEgo": "Barry Allen"
-      },
-      "expect": {
-        "status": 201,
-        "bodyContains": "The Flash"
-      }
+      "name": "Get Admin Profile",
+      "method": "GET",
+      "path": "/users/{{ADMIN_USER_ID}}",
+      "success": [
+        { "name": "Fetch admin", "expect": { "status": 200 } }
+      ]
+    }
+  ]
+}
+```
+
+> **Tip:** Keep a `.rcase.env.local`, `.rcase.env.staging`, and `.rcase.env.prod` file. Copy the right one to `.rcase.env` to switch environments instantly.
+
+---
+
+## ⚡ Dynamic Built-in Variables
+
+No configuration needed — use these anywhere in `params`, `query`, `body`, or `headers`:
+
+| Variable | Example Output | Best For |
+| :--- | :--- | :--- |
+| `{{$uuid}}` | `a3f5c8d2-1b4e-4a7f-9c2d-8e1f3a5b7c9d` | Unique IDs, preventing duplicate key conflicts |
+| `{{$timestamp}}` | `1729781963847` | Epoch-based ordering, idempotency keys |
+| `{{$isoDate}}` | `2026-10-24T16:00:00.000Z` | `createdAt`, `updatedAt` fields |
+| `{{$randomEmail}}` | `user_1729781963@routecase.test` | Registration tests without 409 Conflict |
+| `{{$randomName}}` | `Alice Johnson` | Name fields, display names |
+| `{{$randomInt}}` | `4821` | Random suffixes, test identifiers |
+
+```json
+{
+  "name": "Register New User",
+  "body": {
+    "id":        "{{$uuid}}",
+    "name":      "{{$randomName}}",
+    "email":     "{{$randomEmail}}",
+    "tag":       "user-{{$randomInt}}",
+    "createdAt": "{{$isoDate}}",
+    "sessionId": "{{$timestamp}}"
+  },
+  "expect": { "status": 201 }
+}
+```
+
+---
+
+## 🔗 Response Token Chaining
+
+Capture any field from a response body and inject it into all subsequent requests — perfect for auth flows:
+
+```json
+{
+  "tests": [
+    {
+      "name": "Step 1: Login",
+      "method": "POST",
+      "path": "/auth/login",
+      "success": [
+        {
+          "name": "Get access token",
+          "body": { "email": "admin@example.com", "password": "secret" },
+          "capture": {
+            "authToken":  "accessToken",
+            "authUserId": "user.id",
+            "orgId":      "user.organization.id"
+          },
+          "expect": { "status": 200 }
+        }
+      ]
+    },
+    {
+      "name": "Step 2: Get Protected Profile",
+      "method": "GET",
+      "path": "/users/{{authUserId}}",
+      "headers": { "Authorization": "Bearer {{authToken}}" },
+      "success": [
+        {
+          "name": "Access profile using captured token",
+          "expect": { "status": 200 }
+        }
+      ]
+    },
+    {
+      "name": "Step 3: Create Resource in User's Org",
+      "method": "POST",
+      "path": "/organizations/{{orgId}}/projects",
+      "headers": { "Authorization": "Bearer {{authToken}}" },
+      "success": [
+        {
+          "name": "Create project using captured org ID",
+          "body": { "name": "My Project", "ownerId": "{{authUserId}}" },
+          "capture": { "projectId": "id" },
+          "expect": { "status": 201 }
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Dot-notation paths** are supported for nested JSON:
+- `"accessToken"` → `body.accessToken`
+- `"user.id"` → `body.user.id`
+- `"data.auth.token"` → `body.data.auth.token`
+- `"items[0].id"` → first item in an array
+
+---
+
+## 📋 Copy as cURL
+
+Right-click anywhere inside a `.rcase` file → **RouteCase: Copy as cURL**:
+
+```bash
+curl -X POST "http://localhost:4000/auth/login" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: my-secret-key" \
+  -d '{"username":"admin","password":"secret"}'
+```
+
+The cURL command includes all merged headers (file-level + endpoint-level + case-level) and the serialized request body. Paste it directly into any terminal or share it with teammates.
+
+---
+
+## 📥 OpenAPI / Swagger Import
+
+Press `Ctrl+Shift+P` → **RouteCase: Import OpenAPI / Swagger**:
+
+1. Select a local `openapi.json` or `swagger.json` file — or enter a URL.
+2. RouteCase reads all `paths` from the spec.
+3. A complete `.rcase` file is generated with:
+   - One endpoint per route + HTTP method combination.
+   - Starter `success` case (status 200 or first defined success code).
+   - Starter `errors` case (status 400 or 422 if defined).
+   - `body` pre-filled from `requestBody` examples in the spec.
+   - `params` pre-filled from path parameters.
+   - `query` pre-filled from query parameters with example values.
+
+> **Note:** YAML specs must be converted to JSON first (e.g. via [json2yaml.com](https://www.json2yaml.com/)).
+
+---
+
+## 📚 Bundled Example Library
+
+Press `Ctrl+Shift+P` → **RouteCase: Create Example Test File** to pick from 9 ready-to-run templates:
+
+| Example | What It Tests |
+| :--- | :--- |
+| **`all-features.rcase`** | Every HTTP method, path/query params, bodies, and all assertion types |
+| **`full-suite.rcase`** | Token chaining, dynamic variables, env vars, all 9 HTTP methods in sequence |
+| **`github-public-api.rcase`** | Live `api.github.com` — run instantly, no local server needed |
+| **`ecommerce-crud.rcase`** | Product catalog, cart, orders, line items |
+| **`auth-and-security.rcase`** | JWT login, Bearer auth, 401 / 403 security checks |
+| **`env-demo.rcase`** | `{{API_BASE_URL}}`, `{{API_KEY}}`, `{{$uuid}}`, `{{$isoDate}}` |
+| **`superheroes.rcase`** | Classic quick-start path parameter expansion |
+| **`users-api.rcase`** | RESTful user CRUD, pagination, validation |
+| **`error-handling.rcase`** | 400 / 404 / 500 errors, timeouts, edge cases |
+
+---
+
+## Assertions Reference
+
+Every test case has an `expect` block. All fields except `status` are optional:
+
+```json
+"expect": {
+  "status": 201,
+  "bodyContains": "accessToken",
+  "bodyEquals": { "role": "admin", "active": true },
+  "headers": {
+    "content-type": "application/json",
+    "x-request-id": "abc123"
+  },
+  "maxDurationMs": 500
+}
+```
+
+| Field | Type | Description |
+| :--- | :---: | :--- |
+| `status` | `number` | **Required.** Exact expected HTTP status code (e.g. `200`, `201`, `404`). |
+| `bodyContains` | `string` | A substring that must appear anywhere in the response body. |
+| `bodyEquals` | `any` | Deep equality — the full response body must match this JSON value exactly. |
+| `headers` | `object` | Each key-value pair must be present in the response headers. |
+| `maxDurationMs` | `number` | The request must complete within this many milliseconds. Fails if slower. |
+
+---
+
+## `.rcase` File Schema Reference
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/UTKARSHKUMAR712/routecase/main/schemas/rcase.schema.json",
+  "name": "Suite Name (optional)",
+  "baseUrl": "http://localhost:3000",
+  "headers": { "Global-Header": "sent with every request" },
+  "tests": [
+    {
+      "name": "Endpoint Name",
+      "method": "POST",
+      "path": "/api/resource/{id}",
+      "headers": { "Endpoint-Header": "sent with all cases in this endpoint" },
+      "success": [
+        {
+          "name": "Case Name",
+          "description": "What this case validates (optional)",
+          "params":  { "id": "{{createdId}}" },
+          "query":   { "filter": "active", "page": 1 },
+          "headers": { "Case-Header": "overrides endpoint-level header" },
+          "body":    { "field": "{{$randomName}}", "id": "{{$uuid}}" },
+          "capture": { "capturedVar": "response.body.path" },
+          "expect": {
+            "status": 201,
+            "bodyContains": "success",
+            "bodyEquals": { "ok": true },
+            "headers": { "content-type": "application/json" },
+            "maxDurationMs": 400
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Missing field returns 422",
+          "body": {},
+          "expect": { "status": 422 }
+        }
+      ]
     }
   ]
 }
@@ -463,53 +749,45 @@ For state-changing requests, specify the `body` field (as JSON or string):
 
 ---
 
-## Assertions Reference
+## Commands Reference
 
-Every test case defines an `expect` block:
-
-| Property | Type | Description |
+| Command | Shortcut / Trigger | Description |
 | :--- | :--- | :--- |
-| `status` | `number` | **Required.** Expected HTTP status code (e.g. `200`, `201`, `400`, `404`, `500`). |
-| `bodyContains` | `string` | Optional substring that must be present in the response body. |
-| `bodyEquals` | `any` | Optional exact string or deep JSON object comparison against response body. |
-| `headers` | `object` | Key-value pairs of expected HTTP headers in the response. |
-| `maxDurationMs` | `number` | Maximum allowed request duration in milliseconds (fails if slower). |
-
----
-
-## Commands
-
-| Command | Title | Description |
-| :--- | :--- | :--- |
-| `routecase.runCurrentFile` | **RouteCase: Run Tests in Current File** | Executes all test cases in the active `.rcase` file. |
-| `routecase.runSingleCase` | **RouteCase: Run Test Case** | Executes a single individual test case (called via inline CodeLens). |
-| `routecase.runEndpoint` | **RouteCase: Run Endpoint Cases** | Executes all cases under a specific endpoint route. |
-| `routecase.runAll` | **RouteCase: Run All Tests** | Discovers and runs all `.rcase` and `.routecase` files across the workspace. |
-| `routecase.stopRun` | **RouteCase: Stop Test Run** | Immediately cancels an ongoing test run. |
-| `routecase.validateCurrentFile` | **RouteCase: Validate Current File** | Validates the current file syntax against the RouteCase JSON schema. |
-| `routecase.createExample` | **RouteCase: Create Example Test File** | Generates a starter `api.rcase` superhero test file in the workspace root. |
-| `routecase.openResultsPanel` | **RouteCase: Open Results Panel** | Opens the interactive Webview results panel. |
+| **Run Tests in Current File** | Editor title bar ▶ / CodeLens | Executes all test cases in the active `.rcase` file. |
+| **Run All Tests** | Activity Bar | Discovers and runs all `.rcase` files across the workspace. |
+| **Run Endpoint Cases** | CodeLens `▶ Run Endpoint` | Runs all cases under a single endpoint. |
+| **Run Test Case** | CodeLens `▶ Run Case` | Runs one individual case in isolation. |
+| **Stop Test Run** | Command Palette | Immediately cancels an in-progress test run. |
+| **Validate Current File** | Command Palette | Validates the JSON schema of the active `.rcase` file. |
+| **Create Example Test File** | Command Palette | Opens a picker to create a bundled example in your workspace. |
+| **Copy as cURL** | Right-click inside `.rcase` | Copies the nearest test case as a cURL command to clipboard. |
+| **Import OpenAPI / Swagger** | Command Palette | Generates a `.rcase` suite from an OpenAPI / Swagger JSON spec. |
+| **Open Results Panel** | Command Palette / Tree View | Opens the interactive Webview results dashboard. |
 
 ---
 
 ## Extension Settings
 
-RouteCase contributes the following configuration options:
-
-* `routecase.requestTimeout` *(default: `10000`)*: Timeout in milliseconds for each individual HTTP request.
-* `routecase.maxResponseSize` *(default: `5242880`)*: Maximum response size in bytes before aborting (default 5MB).
-* `routecase.followRedirects` *(default: `false`)*: Whether to follow HTTP redirects (disabled by default for safety).
+| Setting | Default | Description |
+| :--- | :---: | :--- |
+| `routecase.requestTimeout` | `10000` | Per-request timeout in milliseconds. |
+| `routecase.maxResponseSize` | `5242880` | Maximum response size in bytes (5 MB). |
+| `routecase.followRedirects` | `false` | Follow HTTP redirects (disabled by default for safety). |
+| `routecase.env` | `{}` | Key-value environment variables as an alternative to `.rcase.env`. |
 
 ---
 
 ## Security & Privacy
 
-- **No Telemetry / No Tracking:** RouteCase does not collect analytics or make external calls to third-party tracking services.
-- **Credential Redaction:** Sensitive request headers (including `Authorization`, `Cookie`, `x-api-key`, `token`) are automatically redacted with `[REDACTED]` in the UI, tree views, and logs.
-- **Safe Rendering:** All response bodies and URLs rendered inside the VS Code Webview panel are sanitized and escaped against HTML injection (XSS) with strict Content Security Policies.
+- **No Telemetry / No Tracking:** RouteCase makes zero external calls for analytics.
+- **Credential Redaction:** `Authorization`, `Cookie`, `x-api-key`, and `token` headers are replaced with `[REDACTED]` in all results panels, tree views, and logs.
+- **Safe Rendering:** All content in the Webview results panel is HTML-escaped and protected by a strict Content Security Policy.
+- **Local Only:** All test execution is done locally. No data ever leaves your machine.
 
 ---
 
 ## License
 
 [MIT License](https://opensource.org/licenses/MIT) © 2026 RouteCase Contributors
+
+[GitHub](https://github.com/UTKARSHKUMAR712/routecase) · [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase) · [Report an Issue](https://github.com/UTKARSHKUMAR712/routecase/issues)

@@ -1,153 +1,72 @@
 {
   "$schema": "../schemas/rcase.schema.json",
-  "name": "Comprehensive RouteCase Showcase Suite (All Features)",
-  "baseUrl": "https://api.example.com",
+  "name": "RouteCase — Complete Feature Showcase v0.2.0",
+  "baseUrl": "{{API_BASE_URL}}",
   "headers": {
     "Accept": "application/json",
-    "User-Agent": "RouteCase-TestRunner/0.1.0"
+    "x-api-key": "{{API_KEY}}",
+    "User-Agent": "RouteCase/0.2.0"
   },
   "tests": [
+
     {
-      "name": "Create new product item",
-      "method": "POST",
-      "path": "/api/v1/products",
-      "headers": {
-        "Content-Type": "application/json",
-        "x-api-key": "test-api-key-9988"
-      },
+      "name": "1. Health Check (GET — no auth)",
+      "method": "GET",
+      "path": "/health",
       "success": [
         {
-          "name": "Standard product creation",
-          "description": "Verify product creation returns 201 Created with generated ID and strict latency SLA",
+          "name": "Server is healthy",
+          "expect": {
+            "status": 200,
+            "bodyContains": "ok",
+            "maxDurationMs": 300
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "2. Login & Capture Token (POST + capture)",
+      "method": "POST",
+      "path": "/auth/login",
+      "success": [
+        {
+          "name": "Login and store accessToken for later requests",
+          "description": "The 'capture' block extracts values from the response body. {{authToken}} and {{authUserId}} are now available to ALL subsequent test cases in this file.",
           "body": {
-            "title": "Ergonomic Mechanical Keyboard",
-            "price": 149.99,
-            "currency": "USD",
-            "category": "Electronics",
-            "inStock": true,
-            "tags": ["hardware", "keyboard", "usb-c"],
-            "dimensions": {
-              "width": 35.5,
-              "depth": 14.0,
-              "weightGrams": 850
-            }
+            "username": "tester_{{$randomInt}}",
+            "password": "my-secure-password"
+          },
+          "capture": {
+            "authToken": "accessToken",
+            "authUserId": "userId"
           },
           "expect": {
-            "status": 201,
-            "bodyContains": "Ergonomic Mechanical Keyboard",
+            "status": 200,
+            "bodyContains": "accessToken",
             "headers": {
               "content-type": "application/json"
             },
-            "maxDurationMs": 450
+            "maxDurationMs": 500
           }
         }
       ],
       "errors": [
         {
-          "name": "Validation error on negative price",
-          "description": "Ensure negative price triggers a 422 Unprocessable Entity error response",
+          "name": "Wrong password returns 401",
           "body": {
-            "title": "Invalid Price Item",
-            "price": -25.0,
-            "category": "Electronics"
+            "username": "admin",
+            "password": "wrong-password"
           },
           "expect": {
-            "status": 422,
-            "bodyContains": "Price must be greater than zero"
+            "status": 401,
+            "bodyContains": "Invalid credentials"
           }
         },
         {
-          "name": "Missing required title",
-          "description": "Payload without title field returns 400 Bad Request",
+          "name": "Missing username returns 400",
           "body": {
-            "price": 29.99
-          },
-          "expect": {
-            "status": 400,
-            "bodyContains": "title is required"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Search & filter catalog with query parameters",
-      "method": "GET",
-      "path": "/api/v1/products/search?category={category}&minPrice={minPrice}&inStock={inStock}",
-      "success": [
-        {
-          "name": "Search electronics in stock",
-          "description": "Verify multiple query parameters with special characters and spaces are safely encoded",
-          "params": {
-            "category": "Computers & Laptops",
-            "minPrice": 50,
-            "inStock": true
-          },
-          "query": {
-            "page": 1,
-            "limit": 25,
-            "sort": "price_asc"
-          },
-          "expect": {
-            "status": 200,
-            "bodyContains": "results",
-            "maxDurationMs": 600
-          }
-        }
-      ],
-      "errors": [
-        {
-          "name": "Invalid pagination page number",
-          "params": {
-            "category": "Electronics",
-            "minPrice": 0,
-            "inStock": true
-          },
-          "query": {
-            "page": -1,
-            "limit": 10
-          },
-          "expect": {
-            "status": 400,
-            "bodyContains": "page must be positive integer"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Fetch product by path ID template",
-      "method": "GET",
-      "path": "/api/v1/products/{id}",
-      "success": [
-        {
-          "name": "Fetch existing product (id: prod_101)",
-          "params": {
-            "id": "prod_101"
-          },
-          "expect": {
-            "status": 200,
-            "bodyContains": "prod_101",
-            "maxDurationMs": 250
-          }
-        }
-      ],
-      "errors": [
-        {
-          "name": "Product not found",
-          "params": {
-            "id": "prod_nonexistent_9999"
-          },
-          "expect": {
-            "status": 404,
-            "bodyEquals": {
-              "error": "NotFound",
-              "message": "Product with ID prod_nonexistent_9999 does not exist"
-            }
-          }
-        },
-        {
-          "name": "Invalid UUID/format ID",
-          "params": {
-            "id": "###invalid@@@"
+            "password": "some-password"
           },
           "expect": {
             "status": 400
@@ -155,41 +74,189 @@
         }
       ]
     },
+
     {
-      "name": "Partial update product stock & price",
-      "method": "PATCH",
-      "path": "/api/v1/products/{id}",
+      "name": "3. Create User (POST + dynamic variables + capture)",
+      "method": "POST",
+      "path": "/users",
       "headers": {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer sample-jwt-access-token"
+        "Authorization": "Bearer {{authToken}}",
+        "Content-Type": "application/json"
       },
       "success": [
         {
-          "name": "Discount price adjustment",
-          "params": {
-            "id": "prod_101"
-          },
+          "name": "Register a unique user every run",
+          "description": "{{$randomEmail}} generates a new email each run — no more 409 Conflict errors. {{$uuid}} creates a collision-free ID. {{$isoDate}} stamps the creation time.",
           "body": {
-            "price": 129.99,
-            "onSale": true
+            "id": "{{$uuid}}",
+            "name": "{{$randomName}}",
+            "email": "{{$randomEmail}}",
+            "role": "developer",
+            "createdAt": "{{$isoDate}}"
+          },
+          "capture": {
+            "createdUserId": "id"
           },
           "expect": {
-            "status": 200,
-            "bodyContains": "129.99"
+            "status": 201,
+            "bodyContains": "id",
+            "headers": {
+              "content-type": "application/json"
+            },
+            "maxDurationMs": 600
           }
         }
       ],
       "errors": [
         {
-          "name": "Unauthorized update attempt without valid token",
+          "name": "Duplicate email returns 409",
+          "body": {
+            "email": "existing@example.com",
+            "name": "Duplicate User"
+          },
+          "expect": {
+            "status": 409,
+            "bodyContains": "already exists"
+          }
+        },
+        {
+          "name": "Missing required email returns 422",
+          "body": {
+            "name": "No Email User"
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "email is required"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "4. Get User by ID (GET + path param + chained variable)",
+      "method": "GET",
+      "path": "/users/{id}",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}"
+      },
+      "success": [
+        {
+          "name": "Fetch the user we just created using {{createdUserId}}",
+          "description": "{{createdUserId}} was captured from the POST /users response above. No copy-paste required.",
           "params": {
-            "id": "prod_101"
+            "id": "{{createdUserId}}"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "email",
+            "maxDurationMs": 250
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Non-existent user returns 404 with exact JSON body",
+          "params": {
+            "id": "usr_does_not_exist_99999"
+          },
+          "expect": {
+            "status": 404,
+            "bodyEquals": {
+              "error": "Not Found",
+              "message": "User not found"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "5. List Users with Pagination (GET + query params)",
+      "method": "GET",
+      "path": "/users",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}"
+      },
+      "success": [
+        {
+          "name": "Fetch first page of users",
+          "query": {
+            "page": 1,
+            "limit": 10,
+            "sort": "createdAt",
+            "order": "desc"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "users",
+            "maxDurationMs": 400
+          }
+        },
+        {
+          "name": "Search users by role filter",
+          "query": {
+            "role": "developer",
+            "page": 1,
+            "limit": 5
+          },
+          "expect": {
+            "status": 200
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Negative page number returns 400",
+          "query": {
+            "page": -1,
+            "limit": 10
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "page must be"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "6. Full Replace User (PUT)",
+      "method": "PUT",
+      "path": "/users/{id}",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}",
+        "Content-Type": "application/json"
+      },
+      "success": [
+        {
+          "name": "Replace user profile completely",
+          "params": {
+            "id": "{{createdUserId}}"
+          },
+          "body": {
+            "name": "{{$randomName}}",
+            "email": "{{$randomEmail}}",
+            "role": "admin",
+            "updatedAt": "{{$isoDate}}"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "admin"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Unauthorized PUT without valid token",
+          "params": {
+            "id": "{{createdUserId}}"
           },
           "headers": {
             "Authorization": "Bearer expired-or-invalid-token"
           },
           "body": {
-            "price": 10.0
+            "name": "Hacker",
+            "email": "hacker@evil.com"
           },
           "expect": {
             "status": 401,
@@ -198,32 +265,121 @@
         }
       ]
     },
+
     {
-      "name": "Delete obsolete product (Admin only)",
-      "method": "DELETE",
-      "path": "/api/v1/products/{id}",
+      "name": "7. Partial Update User (PATCH)",
+      "method": "PATCH",
+      "path": "/users/{id}",
       "headers": {
-        "Authorization": "Bearer admin-super-secret-token"
+        "Authorization": "Bearer {{authToken}}",
+        "Content-Type": "application/json"
       },
       "success": [
         {
-          "name": "Delete discontinued product",
+          "name": "Update only the user's role",
           "params": {
-            "id": "prod_legacy_404"
+            "id": "{{createdUserId}}"
+          },
+          "body": {
+            "role": "moderator"
           },
           "expect": {
-            "status": 204
+            "status": 200,
+            "bodyContains": "moderator"
           }
         }
       ],
       "errors": [
         {
-          "name": "Forbidden for non-admin accounts",
+          "name": "PATCH on non-existent user returns 404",
           "params": {
-            "id": "prod_legacy_404"
+            "id": "usr_ghost_0000"
+          },
+          "body": {
+            "role": "admin"
+          },
+          "expect": {
+            "status": 404
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "8. Create Product with Dynamic UUID (POST)",
+      "method": "POST",
+      "path": "/products",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}",
+        "Content-Type": "application/json"
+      },
+      "success": [
+        {
+          "name": "Create product with dynamic UUID and random price suffix",
+          "body": {
+            "productId": "{{$uuid}}",
+            "sku": "SKU-{{$randomInt}}",
+            "name": "Premium Gadget {{$randomInt}}",
+            "price": 49.99,
+            "currency": "USD",
+            "inStock": true,
+            "tags": ["electronics", "new-arrival"],
+            "createdAt": "{{$timestamp}}"
+          },
+          "capture": {
+            "createdProductId": "productId"
+          },
+          "expect": {
+            "status": 201,
+            "bodyContains": "productId",
+            "maxDurationMs": 500
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Negative price returns 422",
+          "body": {
+            "productId": "{{$uuid}}",
+            "name": "Bad Product",
+            "price": -10.00
+          },
+          "expect": {
+            "status": 422,
+            "bodyContains": "Price must be"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "9. Delete User (DELETE — uses chained ID)",
+      "method": "DELETE",
+      "path": "/users/{id}",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}"
+      },
+      "success": [
+        {
+          "name": "Delete the user we created and updated above",
+          "description": "{{createdUserId}} flows all the way from Step 3 (POST /users capture) through to this final cleanup step.",
+          "params": {
+            "id": "{{createdUserId}}"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "deleted"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Forbidden: non-admin cannot delete another user",
+          "params": {
+            "id": "{{createdUserId}}"
           },
           "headers": {
-            "Authorization": "Bearer standard-customer-token"
+            "Authorization": "Bearer standard-user-token"
           },
           "expect": {
             "status": 403,
@@ -232,5 +388,6 @@
         }
       ]
     }
+
   ]
 }
