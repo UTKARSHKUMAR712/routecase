@@ -3,7 +3,7 @@
   "displayName": "RouteCase — API Route & Endpoint Tester",
   "description": "Define API endpoints once and run multiple input cases against them directly inside VS Code.",
   "version": "0.1.0",
-  "publisher": "routecase",
+  "publisher": "UtkarshKumar",
   "license": "MIT",
   "repository": {
     "type": "git",
