@@ -5,6 +5,14 @@ All notable changes to the **RouteCase** extension will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-10-25
+
+### Changed
+- **Official Documentation & Website**: Updated extension metadata and links to the official production portal at [https://routecase.vercel.app](https://routecase.vercel.app).
+- **Activity Bar Icon**: Modernized activity bar container icon with the 3-node connected route graph vector.
+- **Brand Identity & Theme**: Rebranded to Obsidian Slate (`#0B0F17`) and Vibrant Emerald (`#10B981`) / Mint (`#34D399`) color system with zero AI-cyan dependencies.
+- **Enhanced Readme & Examples**: Added comprehensive documentation links, quickstart guides, and community resources.
+
 ## [0.2.0] - 2026-10-24
 
 ### Added
