@@ -106,18 +106,81 @@ Say goodbye to bloated Electron apps, heavy memory footprints, and manual token 
 
 ## How RouteCase Works in 4 Steps
 
-```
- ┌───────────────┐      ┌───────────────┐      ┌───────────────┐      ┌───────────────┐
- │  1. Define    │ ───> │  2. Execute   │ ───> │  3. Assert    │ ───> │  4. Chain     │
- │ Create .rcase │      │ Click inline  │      │ Status, body, │      │ Inject tokens │
- │ JSON suite    │      │ CodeLens cell │      │ headers & SLA │      │ downstream    │
- └───────────────┘      └───────────────┘      └───────────────┘      └───────────────┘
-```
+<div v-pre class="rc-workflow-wrapper">
+  <div class="rc-workflow-grid">
+    <!-- Step 1 -->
+    <div class="rc-workflow-card">
+      <div class="rc-workflow-header">
+        <span class="rc-workflow-step">STEP 01</span>
+        <div class="rc-workflow-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        </div>
+      </div>
+      <h3 class="rc-workflow-title">Define Contract</h3>
+      <p class="rc-workflow-desc">Structure endpoints, path templates, and mock inputs in a clean <code>.rcase</code> JSON suite with instant schema autocomplete.</p>
+      <div class="rc-workflow-code">
+        <div class="rc-workflow-tag">suite.rcase</div>
+        <div class="rc-workflow-snippet">
+          <span class="tok-k">"path"</span>: <span class="tok-s">"/users/{id}"</span>
+        </div>
+      </div>
+    </div>
 
-1. **Define Your Routes:** Structure your endpoints, URL templates, and expected responses in a single `.rcase` file. Schema validation and autocomplete work out-of-the-box.
-2. **Execute In-Editor:** Run entire test files, specific endpoints, or isolated test cases using Jupyter-style CodeLens actions.
-3. **Verify Responses:** Assert HTTP status codes, substring presence, deep JSON equality, headers, and latency thresholds.
-4. **Chain Variables:** Capture values from successful responses (like auth tokens or generated IDs) to reuse in subsequent requests automatically.
+    <!-- Step 2 -->
+    <div class="rc-workflow-card">
+      <div class="rc-workflow-header">
+        <span class="rc-workflow-step">STEP 02</span>
+        <div class="rc-workflow-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </div>
+      </div>
+      <h3 class="rc-workflow-title">Trigger In-Editor</h3>
+      <p class="rc-workflow-desc">Run full suites, individual routes, or isolated test cases using floating Jupyter-style CodeLens cells with one click.</p>
+      <div class="rc-workflow-code">
+        <div class="rc-workflow-tag">CodeLens Cell</div>
+        <div class="rc-workflow-snippet">
+          <span class="tok-action">▶ Run Endpoint</span> <span class="tok-time">⚡ 28ms</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="rc-workflow-card">
+      <div class="rc-workflow-header">
+        <span class="rc-workflow-step">STEP 03</span>
+        <div class="rc-workflow-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+        </div>
+      </div>
+      <h3 class="rc-workflow-title">Verify Assertions</h3>
+      <p class="rc-workflow-desc">Assert HTTP status codes, structured body JSON equality, substring containment, and strict latency SLA thresholds.</p>
+      <div class="rc-workflow-code">
+        <div class="rc-workflow-tag">Contract Guard</div>
+        <div class="rc-workflow-snippet">
+          <span class="tok-pass">✓ status: 200</span> <span class="tok-pass">✓ &lt; 250ms</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="rc-workflow-card">
+      <div class="rc-workflow-header">
+        <span class="rc-workflow-step">STEP 04</span>
+        <div class="rc-workflow-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </div>
+      </div>
+      <h3 class="rc-workflow-title">Cascade Variables</h3>
+      <p class="rc-workflow-desc">Capture auth tokens and IDs from successful responses to inject them into downstream test cases automatically.</p>
+      <div class="rc-workflow-code">
+        <div class="rc-workflow-tag">Variable Chaining</div>
+        <div class="rc-workflow-snippet">
+          <span class="tok-k">capture</span>: <span class="tok-s">{ "token": "jwt" }</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 ---
 
@@ -213,17 +276,86 @@ Say goodbye to bloated Electron apps, heavy memory footprints, and manual token 
 
 ## Frequently Asked Questions
 
-### What file extensions does RouteCase support?
-RouteCase uses `.rcase` as its primary extension, and also supports `.routecase` and `*.rcase.json`. All formats are automatically mapped to the RouteCase language grammar and JSON schema.
+<div v-pre class="rc-faq-container">
+  <details class="rc-faq-item" open>
+    <summary class="rc-faq-summary">
+      <span class="rc-faq-question">What file extensions does RouteCase support?</span>
+      <span class="rc-faq-badge">Syntax & Schema</span>
+      <span class="rc-faq-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </span>
+    </summary>
+    <div class="rc-faq-content">
+      <p>RouteCase uses <code>.rcase</code> as its primary extension, and also fully recognizes <code>.routecase</code> and <code>*.rcase.json</code> files. When opened in VS Code, all files automatically activate the RouteCase language grammar, bundled JSON schema validation, hover tooltips, and real-time syntax checking.</p>
+    </div>
+  </details>
 
-### Does RouteCase require an account or cloud login?
-No! RouteCase is 100% local, open-source, and offline. Your endpoints, tokens, requests, and tests never leave your local development machine.
+  <details class="rc-faq-item">
+    <summary class="rc-faq-summary">
+      <span class="rc-faq-question">Does RouteCase require a cloud account, login, or telemetry?</span>
+      <span class="rc-faq-badge">Privacy & Offline</span>
+      <span class="rc-faq-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </span>
+    </summary>
+    <div class="rc-faq-content">
+      <p><strong>Zero accounts, zero cloud dependencies, zero tracking.</strong> RouteCase is 100% offline and runs strictly on your local machine. Your API credentials, payloads, tokens, and test suites never leave your development environment. Sensitive headers like <code>Authorization</code>, <code>apiKey</code>, and session cookies are automatically masked with <code>[REDACTED]</code> in all log outputs.</p>
+    </div>
+  </details>
 
-### Can I test APIs without starting a local server?
-Yes! RouteCase can test any reachable HTTP or HTTPS endpoint on your local machine, local network, or the public internet. Try our bundled `github-public-api.rcase` example to test live GitHub REST endpoints immediately.
+  <details class="rc-faq-item">
+    <summary class="rc-faq-summary">
+      <span class="rc-faq-question">Can I test local development servers without starting a proxy?</span>
+      <span class="rc-faq-badge">Local Testing</span>
+      <span class="rc-faq-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </span>
+    </summary>
+    <div class="rc-faq-content">
+      <p>Yes! RouteCase connects directly to any reachable endpoint—including <code>http://localhost:3000</code>, <code>http://127.0.0.1:8080</code>, local Docker containers, private VPN environments, and public internet APIs. No separate background daemon or browser companion is required.</p>
+    </div>
+  </details>
 
-### How do I install RouteCase?
-Search for **`RouteCase`** in the Visual Studio Code Extensions view (`Ctrl+Shift+X` / `Cmd+Shift+X`), or run `code --install-extension UtkarshKumar.routecase` in your terminal.
+  <details class="rc-faq-item">
+    <summary class="rc-faq-summary">
+      <span class="rc-faq-question">How does variable chaining and token capture work?</span>
+      <span class="rc-faq-badge">Workflow Automation</span>
+      <span class="rc-faq-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </span>
+    </summary>
+    <div class="rc-faq-content">
+      <p>In any test case, provide a <code>capture</code> map to extract response JSON properties using dot notation (e.g. <code>"authToken": "data.accessToken"</code>). RouteCase persists these variables in memory during the execution run, enabling subsequent requests to reference them via template syntax: <code>"Authorization": "Bearer {{authToken}}"</code>.</p>
+    </div>
+  </details>
+
+  <details class="rc-faq-item">
+    <summary class="rc-faq-summary">
+      <span class="rc-faq-question">Can I import my existing OpenAPI 3.0 or Swagger 2.0 specifications?</span>
+      <span class="rc-faq-badge">Migration</span>
+      <span class="rc-faq-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </span>
+    </summary>
+    <div class="rc-faq-content">
+      <p>Yes. RouteCase includes a native, zero-dependency OpenAPI importer. Press <code>Ctrl+Shift+P</code> (or <code>Cmd+Shift+P</code> on macOS), run <strong><code>RouteCase: Import from OpenAPI / Swagger</code></strong>, select your JSON spec, and RouteCase instantly transforms your operations, paths, parameters, and schemas into executable <code>.rcase</code> suites.</p>
+    </div>
+  </details>
+
+  <details class="rc-faq-item">
+    <summary class="rc-faq-summary">
+      <span class="rc-faq-question">How do I install RouteCase in Visual Studio Code?</span>
+      <span class="rc-faq-badge">Installation</span>
+      <span class="rc-faq-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </span>
+    </summary>
+    <div class="rc-faq-content">
+      <p>Open VS Code, press <code>Ctrl+Shift+X</code> (or <code>Cmd+Shift+X</code>), search for <strong><code>RouteCase</code></strong>, and click <strong>Install</strong>. Alternatively, install it directly from your command line with:</p>
+      <p><code>code --install-extension UtkarshKumar.routecase</code></p>
+    </div>
+  </details>
+</div>
 
 ---
 

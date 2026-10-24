@@ -267,3 +267,257 @@
   border-color: #F59E0B;
   color: var(--vp-c-text-1);
 }
+
+/* =====================================================================
+   4-Step Workflow Pipeline Component
+   ===================================================================== */
+.rc-workflow-wrapper {
+  margin: 3rem 0;
+}
+
+.rc-workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-top: 2rem;
+  position: relative;
+}
+
+@media (max-width: 1024px) {
+  .rc-workflow-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .rc-workflow-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rc-workflow-card {
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 14px;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.dark .rc-workflow-card {
+  background: #111723;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.rc-workflow-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15);
+}
+
+.rc-workflow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.rc-workflow-step {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+}
+
+.rc-workflow-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--vp-c-brand-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark .rc-workflow-icon {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34D399;
+}
+
+.rc-workflow-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+  margin: 0 0 0.5rem 0 !important;
+  letter-spacing: -0.01em;
+}
+
+.rc-workflow-desc {
+  font-size: 0.88rem;
+  color: var(--vp-c-text-2);
+  line-height: 1.55;
+  margin: 0 0 1.25rem 0 !important;
+  flex-grow: 1;
+}
+
+.rc-workflow-code {
+  background: #0B0F17;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.78rem;
+}
+
+.rc-workflow-tag {
+  color: #94A3B8;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.rc-workflow-snippet {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #F8FAFC;
+}
+
+.rc-workflow-snippet .tok-k { color: #34D399; }
+.rc-workflow-snippet .tok-s { color: #A7F3D0; }
+.rc-workflow-snippet .tok-action { color: #34D399; font-weight: 600; }
+.rc-workflow-snippet .tok-time { color: #F59E0B; margin-left: 6px; }
+.rc-workflow-snippet .tok-pass { color: #10B981; font-weight: 600; margin-right: 6px; }
+
+/* =====================================================================
+   Accordion FAQ Component
+   ===================================================================== */
+.rc-faq-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 2rem 0 3.5rem 0;
+}
+
+.rc-faq-item {
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.dark .rc-faq-item {
+  background: #111723;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.rc-faq-item:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.rc-faq-item[open] {
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.12);
+}
+
+.rc-faq-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.4rem;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.rc-faq-summary::-webkit-details-marker {
+  display: none;
+}
+
+.rc-faq-question {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  flex-grow: 1;
+}
+
+.rc-faq-badge {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--vp-c-brand-1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  white-space: nowrap;
+}
+
+.dark .rc-faq-badge {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34D399;
+}
+
+.rc-faq-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vp-c-text-3);
+  transition: transform 0.25s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.rc-faq-item[open] .rc-faq-icon {
+  transform: rotate(180deg);
+  color: var(--vp-c-brand-1);
+}
+
+.rc-faq-content {
+  padding: 0 1.4rem 1.35rem 1.4rem;
+  color: var(--vp-c-text-2);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  border-top: 1px solid var(--vp-c-border);
+  padding-top: 1rem;
+  margin-top: 0.2rem;
+}
+
+.dark .rc-faq-content {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.rc-faq-content p {
+  margin: 0.5rem 0 !important;
+}
+
+.rc-faq-content code {
+  font-family: var(--vp-font-family-mono);
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--vp-c-brand-1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.88em;
+}
+
+.dark .rc-faq-content code {
+  color: #34D399;
+}
+
