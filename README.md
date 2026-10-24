@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="resources/icon.png" width="120" height="120" alt="RouteCase Logo" />
+  <img src="resources/icon.png" width="160" height="160" alt="RouteCase Logo" />
+  <br/>
+  <strong>API TESTING MADE SIMPLE</strong>
 </p>
 
 # RouteCase — API Route & Endpoint Tester for VS Code
