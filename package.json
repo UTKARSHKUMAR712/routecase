@@ -222,7 +222,10 @@
     "test": "tsc -p ./ && node --test out/tests/unit/**/*.test.js out/tests/integration/**/*.test.js",
     "test:unit": "tsc -p ./ && node --test out/tests/unit/**/*.test.js",
     "test:integration": "tsc -p ./ && node --test out/tests/integration/**/*.test.js",
-    "package": "vsce package"
+    "package": "vsce package",
+    "website:dev": "npm --prefix website run dev",
+    "website:build": "npm --prefix website run build",
+    "website:preview": "npm --prefix website run preview"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

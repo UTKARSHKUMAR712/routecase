@@ -1,0 +1,269 @@
+/* RouteCase Official Design System — Emerald / Mint & Obsidian Theme */
+
+:root {
+  /* Brand Colors: Vibrant Emerald & Mint (No AI Cyan/Blue) */
+  --vp-c-brand-1: #059669;
+  --vp-c-brand-2: #10B981;
+  --vp-c-brand-3: #047857;
+  --vp-c-brand-soft: rgba(16, 185, 129, 0.12);
+
+  /* Light Mode Backgrounds */
+  --vp-c-bg: #FFFFFF;
+  --vp-c-bg-alt: #F8FAFC;
+  --vp-c-bg-elv: #FFFFFF;
+  --vp-c-bg-soft: #F1F5F9;
+
+  /* Light Mode Typography */
+  --vp-c-text-1: #0F172A;
+  --vp-c-text-2: #334155;
+  --vp-c-text-3: #64748B;
+
+  /* Light Mode Borders */
+  --vp-c-border: #E2E8F0;
+  --vp-c-divider: #E2E8F0;
+  --vp-c-gutter: #F8FAFC;
+
+  --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --rc-glow-emerald: 0 0 30px rgba(16, 185, 129, 0.2);
+  --rc-glow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.dark {
+  /* Dark Mode Brand Colors: Crisp Mint / Emerald */
+  --vp-c-brand-1: #10B981;
+  --vp-c-brand-2: #34D399;
+  --vp-c-brand-3: #059669;
+  --vp-c-brand-soft: rgba(16, 185, 129, 0.16);
+
+  /* Dark Mode Backgrounds */
+  --vp-c-bg: #0B0F17;
+  --vp-c-bg-alt: #111723;
+  --vp-c-bg-elv: #151D2C;
+  --vp-c-bg-soft: #1B2436;
+
+  /* Dark Mode Typography */
+  --vp-c-text-1: #F8FAFC;
+  --vp-c-text-2: #CBD5E1;
+  --vp-c-text-3: #94A3B8;
+
+  /* Dark Mode Borders */
+  --vp-c-border: rgba(255, 255, 255, 0.08);
+  --vp-c-divider: rgba(255, 255, 255, 0.08);
+  --vp-c-gutter: #0B0F17;
+
+  --rc-glow-emerald: 0 0 35px rgba(16, 185, 129, 0.25);
+  --rc-glow-card: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Hero Badge */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.12);
+}
+
+.dark .hero-badge {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34D399;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+/* Feature Showcase Mockup Container (Always dark terminal aesthetic for readability) */
+.rc-mockup-window {
+  background: #0D131F;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(16, 185, 129, 0.12);
+  margin: 2.5rem 0;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.88rem;
+}
+
+.rc-mockup-titlebar {
+  background: #141C2B;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rc-mockup-dots {
+  display: flex;
+  gap: 6px;
+}
+.rc-mockup-dots span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.rc-dot-red { background: #EF4444; }
+.rc-dot-yellow { background: #F59E0B; }
+.rc-dot-green { background: #10B981; }
+
+.rc-mockup-filename {
+  color: #94A3B8;
+  font-size: 0.8rem;
+  margin-left: auto;
+  margin-right: auto;
+  font-weight: 500;
+}
+
+.rc-mockup-body {
+  padding: 1.5rem;
+  color: #F8FAFC;
+  line-height: 1.6;
+}
+
+/* CodeLens Action Row */
+.codelens-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0 8px 0;
+  font-size: 0.78rem;
+  color: #34D399;
+  font-weight: 600;
+}
+
+.codelens-action {
+  cursor: pointer;
+  padding: 3px 10px;
+  background: rgba(16, 185, 129, 0.12);
+  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34D399;
+  transition: all 0.2s ease;
+}
+.codelens-action:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: rgba(52, 211, 153, 0.5);
+}
+
+.badge-pass {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.badge-captured {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Developer-Centric Comparison Matrix with High Contrast */
+.rc-comparison-wrapper {
+  overflow-x: auto;
+  margin: 2rem 0;
+  border-radius: 12px;
+  border: 1px solid var(--vp-c-border);
+  box-shadow: var(--rc-glow-card);
+}
+
+.rc-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  margin: 0 !important;
+}
+
+.rc-comparison-table th {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  font-weight: 700;
+  padding: 14px 18px;
+  border-bottom: 2px solid var(--vp-c-border);
+  text-align: left;
+}
+
+.rc-comparison-table td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--vp-c-border);
+  color: var(--vp-c-text-2);
+}
+
+.rc-comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.rc-comparison-table tr:hover td {
+  background: var(--vp-c-bg-alt);
+}
+
+/* Code Pills in Comparison Table */
+.rc-code-pill {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  margin: 1px 3px;
+}
+
+.dark .rc-code-pill {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34D399;
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.rc-status-pill-yes {
+  color: #10B981;
+  font-weight: 700;
+}
+
+.rc-status-pill-no {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+.rc-status-pill-partial {
+  color: #F59E0B;
+  font-weight: 600;
+}
+
+/* Callout Box styling */
+.rc-callout {
+  padding: 1.25rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  border-left: 4px solid;
+}
+.rc-callout-info {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: #10B981;
+  color: var(--vp-c-text-1);
+}
+.rc-callout-tip {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: #10B981;
+  color: var(--vp-c-text-1);
+}
+.rc-callout-warning {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: #F59E0B;
+  color: var(--vp-c-text-1);
+}

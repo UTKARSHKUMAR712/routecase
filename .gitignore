@@ -6,3 +6,6 @@ dist/
 .DS_Store
 Thumbs.db
 *.log
+website/.vitepress/cache/
+website/.vitepress/dist/
+

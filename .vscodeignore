@@ -5,6 +5,8 @@ tests/**
 out/tests/**
 scripts/**
 test-server/**
+website/**
+.agents/**
 .git/**
 .gitignore
 tsconfig.json
