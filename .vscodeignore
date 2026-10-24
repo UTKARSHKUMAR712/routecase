@@ -4,6 +4,7 @@ src/**
 tests/**
 out/tests/**
 scripts/**
+test-server/**
 .git/**
 .gitignore
 tsconfig.json

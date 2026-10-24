@@ -61,6 +61,25 @@ describe('RouteCase Execution Engine Integration Tests', () => {
         return;
       }
 
+      if (url.pathname === '/api/login' && req.method === 'POST') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ accessToken: 'test-token-jwt-999', userId: 'user-77' }));
+        return;
+      }
+
+      if (url.pathname === '/api/users/user-77' && req.method === 'GET') {
+        const auth = req.headers['authorization'];
+        if (auth === 'Bearer test-token-jwt-999') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ id: 'user-77', status: 'authenticated' }));
+          return;
+        } else {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Unauthorized' }));
+          return;
+        }
+      }
+
       if (url.pathname === '/redirect-external') {
         res.writeHead(302, { 'Location': 'http://malicious-external-domain.test/leak' });
         res.end();
@@ -311,5 +330,54 @@ describe('RouteCase Execution Engine Integration Tests', () => {
 
     assert.equal(suiteResult.results[0].status, 'ERROR');
     assert.match(suiteResult.results[0].error || '', /maximum size limit/);
+  });
+
+  it('should support token capture and variable chaining across cases', async () => {
+    const doc: RCaseDocument = {
+      baseUrl: '{{BASE_URL}}',
+      tests: [
+        {
+          name: 'Auth flow',
+          method: 'POST',
+          path: '/api/login',
+          success: [
+            {
+              name: 'Login',
+              capture: {
+                savedToken: 'accessToken',
+                savedUser: 'userId'
+              },
+              expect: { status: 200 }
+            }
+          ]
+        },
+        {
+          name: 'Protected user profile',
+          method: 'GET',
+          path: '/api/users/{id}',
+          success: [
+            {
+              name: 'Fetch profile with captured token',
+              params: { id: '{{savedUser}}' },
+              headers: { Authorization: 'Bearer {{savedToken}}' },
+              expect: { status: 200, bodyContains: 'authenticated' }
+            }
+          ]
+        }
+      ]
+    };
+
+    const executor = new TestExecutor();
+    const suiteResult = await executor.executeSuite(doc, 'chain-test.rcase', {
+      env: { BASE_URL: baseUrl }
+    });
+
+    assert.equal(suiteResult.totalCount, 2);
+    assert.equal(suiteResult.passedCount, 2);
+    assert.equal(suiteResult.failedCount, 0);
+    assert.equal(suiteResult.results[0].status, 'PASS');
+    assert.equal(suiteResult.results[0].captured?.savedToken, 'test-token-jwt-999');
+    assert.equal(suiteResult.results[0].captured?.savedUser, 'user-77');
+    assert.equal(suiteResult.results[1].status, 'PASS');
   });
 });

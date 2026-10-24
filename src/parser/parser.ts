@@ -48,7 +48,7 @@ export function parseRCase(content: string): ParseResult {
   // Validate baseUrl
   if (typeof obj.baseUrl !== 'string' || !obj.baseUrl.trim()) {
     errors.push({ path: 'baseUrl', message: 'Missing or invalid "baseUrl". Must be a non-empty string URL.' });
-  } else {
+  } else if (!/\{\{[^}]+\}\}/.test(obj.baseUrl)) {
     try {
       const parsedUrl = new URL(obj.baseUrl);
       if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
@@ -163,6 +163,18 @@ function validateTestCase(raw: unknown, path: string, errors: ValidationError[])
   if (tc.headers !== undefined) {
     if (typeof tc.headers !== 'object' || tc.headers === null || Array.isArray(tc.headers)) {
       errors.push({ path: `${path}.headers`, message: '"headers" must be an object.' });
+    }
+  }
+
+  if (tc.capture !== undefined) {
+    if (typeof tc.capture !== 'object' || tc.capture === null || Array.isArray(tc.capture)) {
+      errors.push({ path: `${path}.capture`, message: '"capture" must be an object mapping variable names to dot-notation response paths.' });
+    } else {
+      for (const [k, v] of Object.entries(tc.capture)) {
+        if (typeof v !== 'string' || !v.trim()) {
+          errors.push({ path: `${path}.capture.${k}`, message: 'Capture path must be a non-empty string.' });
+        }
+      }
     }
   }
 

@@ -1,11 +1,18 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as http from 'http';
+import * as https from 'https';
+import { URL } from 'url';
 import { parseRCase } from './parser/parser';
 import { TestExecutor } from './engine/executor';
 import { RouteCaseTreeProvider } from './providers/resultsTreeProvider';
 import { RouteCaseResultsPanel } from './webview/resultsPanel';
 import { RouteCaseCodeLensProvider } from './providers/codeLensProvider';
+import { findCodeLensLocations } from './providers/codeLensScanner';
+import { buildCurlCommand } from './engine/curl';
+import { loadEnvironment } from './engine/environment';
+import { convertOpenApiToRCase } from './importer/openApiImporter';
 import { TestSuiteResult, ExecutionFilter } from './models/types';
 
 let currentExecutor: TestExecutor | undefined;
@@ -233,6 +240,189 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  // 10. Copy as cURL command (Feature 2)
+  const copyAsCurlCmd = vscode.commands.registerCommand('routecase.copyAsCurl', async () => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showWarningMessage('Please open a .rcase file to copy a cURL command.');
+      return;
+    }
+
+    const documentText = editor.document.getText();
+    const parseResult = parseRCase(documentText);
+    if (!parseResult.valid || !parseResult.document) {
+      vscode.window.showErrorMessage('Cannot generate cURL: Current .rcase file has validation errors.');
+      return;
+    }
+
+    const doc = parseResult.document;
+    const cursorLine = editor.selection.active.line;
+    const locations = findCodeLensLocations(documentText);
+    const caseLocations = locations.filter(l => l.type === 'case' && l.endpointName && l.caseName);
+
+    if (caseLocations.length === 0) {
+      vscode.window.showWarningMessage('No test cases found in this file.');
+      return;
+    }
+
+    // Find nearest case to cursor
+    let nearestLoc = caseLocations[0];
+    let minDistance = Math.abs(caseLocations[0].line - cursorLine);
+    for (const loc of caseLocations) {
+      const dist = Math.abs(loc.line - cursorLine);
+      if (dist < minDistance) {
+        minDistance = dist;
+        nearestLoc = loc;
+      }
+    }
+
+    const targetEndpoint = doc.tests.find(e => e.name === nearestLoc.endpointName);
+    if (!targetEndpoint) {
+      vscode.window.showWarningMessage(`Could not find endpoint "${nearestLoc.endpointName}".`);
+      return;
+    }
+
+    const allCases = [...(targetEndpoint.success || []), ...(targetEndpoint.errors || [])];
+    const targetCase = allCases.find(c => c.name === nearestLoc.caseName);
+    if (!targetCase) {
+      vscode.window.showWarningMessage(`Could not find test case "${nearestLoc.caseName}".`);
+      return;
+    }
+
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    const workspacePath = workspaceFolders && workspaceFolders.length > 0
+      ? workspaceFolders[0].uri.fsPath
+      : path.dirname(editor.document.fileName);
+    const config = vscode.workspace.getConfiguration('routecase');
+    const envSettings = config.get<Record<string, string>>('env', {});
+    const env = loadEnvironment(workspacePath, envSettings);
+
+    const curlString = buildCurlCommand(doc, targetEndpoint, targetCase, env);
+    await vscode.env.clipboard.writeText(curlString);
+    vscode.window.showInformationMessage('cURL command copied to clipboard!');
+  });
+
+  // 11. Import OpenAPI / Swagger (Feature 5)
+  const importOpenApiCmd = vscode.commands.registerCommand('routecase.importOpenAPI', async () => {
+    const choice = await vscode.window.showQuickPick(
+      [
+        {
+          label: '$(file) Import from local JSON file',
+          description: 'Select an OpenAPI 3.x or Swagger 2.x JSON file',
+          action: 'file'
+        },
+        {
+          label: '$(globe) Import from URL',
+          description: 'Provide an HTTP/HTTPS URL returning OpenAPI JSON',
+          action: 'url'
+        }
+      ],
+      { placeHolder: 'Select how you want to import OpenAPI / Swagger specification' }
+    );
+
+    if (!choice) {
+      return;
+    }
+
+    let jsonContent: string | undefined;
+
+    if (choice.action === 'file') {
+      const uris = await vscode.window.showOpenDialog({
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: false,
+        filters: {
+          'OpenAPI JSON': ['json'],
+          'All Files': ['*']
+        },
+        openLabel: 'Import OpenAPI Spec'
+      });
+
+      if (!uris || uris.length === 0) {
+        return;
+      }
+
+      const filePath = uris[0].fsPath;
+      if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+        vscode.window.showWarningMessage('Please convert your YAML spec to JSON first (e.g. using https://www.json2yaml.com/)');
+        return;
+      }
+
+      try {
+        jsonContent = fs.readFileSync(filePath, 'utf8');
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        vscode.window.showErrorMessage(`Failed to read file: ${msg}`);
+        return;
+      }
+    } else {
+      const inputUrl = await vscode.window.showInputBox({
+        prompt: 'Enter OpenAPI / Swagger JSON URL',
+        placeHolder: 'https://petstore.swagger.io/v2/swagger.json'
+      });
+
+      if (!inputUrl) {
+        return;
+      }
+
+      if (inputUrl.endsWith('.yaml') || inputUrl.endsWith('.yml')) {
+        vscode.window.showWarningMessage('Please convert your YAML spec to JSON first (e.g. using https://www.json2yaml.com/)');
+        return;
+      }
+
+      try {
+        jsonContent = await fetchHttpContent(inputUrl);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        vscode.window.showErrorMessage(`Failed to fetch OpenAPI spec from URL: ${msg}`);
+        return;
+      }
+    }
+
+    if (!jsonContent) {
+      return;
+    }
+
+    let parsedSpec: unknown;
+    try {
+      parsedSpec = JSON.parse(jsonContent);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      vscode.window.showErrorMessage(`Failed to parse OpenAPI JSON: ${msg}`);
+      return;
+    }
+
+    try {
+      const rcaseDoc = convertOpenApiToRCase(parsedSpec);
+      const formattedJson = JSON.stringify(rcaseDoc, null, 2);
+
+      const workspaceFolders = vscode.workspace.workspaceFolders;
+      if (workspaceFolders && workspaceFolders.length > 0) {
+        const sanitizedTitle = (rcaseDoc.name || 'openapi')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '') || 'imported-api';
+        const targetFileName = `${sanitizedTitle}.rcase`;
+        const targetPath = path.join(workspaceFolders[0].uri.fsPath, targetFileName);
+
+        fs.writeFileSync(targetPath, formattedJson, 'utf8');
+        const doc = await vscode.workspace.openTextDocument(targetPath);
+        await vscode.window.showTextDocument(doc);
+        vscode.window.showInformationMessage(`Successfully imported "${rcaseDoc.name}" into ${targetFileName}!`);
+      } else {
+        const doc = await vscode.workspace.openTextDocument({
+          content: formattedJson,
+          language: 'routecase'
+        });
+        await vscode.window.showTextDocument(doc);
+        vscode.window.showInformationMessage(`Successfully imported "${rcaseDoc.name}"!`);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      vscode.window.showErrorMessage(`Failed to import OpenAPI spec: ${msg}`);
+    }
+  });
+
   context.subscriptions.push(
     runCurrentFileCmd,
     runAllCmd,
@@ -242,8 +432,42 @@ export function activate(context: vscode.ExtensionContext) {
     validateCmd,
     createExampleCmd,
     openPanelCmd,
-    rerunCaseCmd
+    rerunCaseCmd,
+    copyAsCurlCmd,
+    importOpenApiCmd
   );
+}
+
+function fetchHttpContent(urlStr: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let url: URL;
+    try {
+      url = new URL(urlStr);
+    } catch {
+      return reject(new Error(`Invalid URL: ${urlStr}`));
+    }
+
+    const client = url.protocol === 'https:' ? https : http;
+    const req = client.get(urlStr, { headers: { Accept: 'application/json, text/plain, */*' } }, res => {
+      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchHttpContent(res.headers.location).then(resolve).catch(reject);
+      }
+      if (res.statusCode && res.statusCode >= 400) {
+        return reject(new Error(`HTTP ${res.statusCode} ${res.statusMessage || ''}`));
+      }
+      let data = '';
+      res.setEncoding('utf8');
+      res.on('data', chunk => {
+        data += chunk;
+      });
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.setTimeout(10000, () => {
+      req.destroy();
+      reject(new Error('Request timed out'));
+    });
+  });
 }
 
 async function executeFile(
@@ -286,6 +510,12 @@ async function executeFile(
   const timeoutMs = config.get<number>('requestTimeout', 10000);
   const maxResponseSizeBytes = config.get<number>('maxResponseSize', 5242880);
   const followRedirects = config.get<boolean>('followRedirects', false);
+  const envSettings = config.get<Record<string, string>>('env', {});
+
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  const workspacePath = workspaceFolders && workspaceFolders.length > 0
+    ? workspaceFolders[0].uri.fsPath
+    : path.dirname(filePath);
 
   try {
     await vscode.window.withProgress(
@@ -304,6 +534,8 @@ async function executeFile(
           maxResponseSizeBytes,
           followRedirects,
           filter,
+          workspacePath,
+          env: envSettings,
           onCaseStart: tc => {
             progress.report({ message: `${tc.endpointName} -> ${tc.caseName}` });
             treeProvider.setCaseRunning(tc.id, tc.endpointName, tc.caseName);

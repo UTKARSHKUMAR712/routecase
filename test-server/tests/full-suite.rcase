@@ -1,0 +1,198 @@
+{
+  "$schema": "../../schemas/rcase.schema.json",
+  "name": "RouteCase Full Feature Test Suite",
+  "baseUrl": "{{API_BASE_URL}}",
+  "headers": {
+    "x-api-key": "{{API_KEY}}"
+  },
+  "tests": [
+    {
+      "name": "Health Check",
+      "method": "GET",
+      "path": "/health",
+      "success": [
+        {
+          "name": "Server is healthy",
+          "expect": {
+            "status": 200,
+            "bodyContains": "ok"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication & Token Capture",
+      "method": "POST",
+      "path": "/auth/login",
+      "success": [
+        {
+          "name": "Login and capture access token",
+          "body": {
+            "username": "tester_{{$randomInt}}",
+            "password": "secret-password"
+          },
+          "capture": {
+            "authToken": "accessToken",
+            "authUserId": "userId"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "jwt_sample_token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get User with Chained Variable",
+      "method": "GET",
+      "path": "/users/{id}",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}"
+      },
+      "success": [
+        {
+          "name": "Fetch captured user ID",
+          "params": {
+            "id": "{{authUserId}}"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "usr_42"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create User with Dynamic Email and Name",
+      "method": "POST",
+      "path": "/users",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}"
+      },
+      "success": [
+        {
+          "name": "Create unique user",
+          "body": {
+            "name": "{{$randomName}}",
+            "email": "{{$randomEmail}}",
+            "created": "{{$timestamp}}"
+          },
+          "capture": {
+            "createdUserId": "id"
+          },
+          "expect": {
+            "status": 201,
+            "bodyContains": "@routecase.test"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Reject duplicate email",
+          "body": {
+            "email": "alice@routecase.test"
+          },
+          "expect": {
+            "status": 400,
+            "bodyContains": "Email already exists"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Full Update User (PUT)",
+      "method": "PUT",
+      "path": "/users/{id}",
+      "success": [
+        {
+          "name": "Update user details",
+          "params": {
+            "id": "{{createdUserId}}"
+          },
+          "body": {
+            "name": "Updated Name",
+            "email": "{{$randomEmail}}"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "updated"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partial Update User (PATCH)",
+      "method": "PATCH",
+      "path": "/users/{id}",
+      "success": [
+        {
+          "name": "Patch user role",
+          "params": {
+            "id": "{{createdUserId}}"
+          },
+          "body": {
+            "role": "moderator"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "moderator"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete User (DELETE)",
+      "method": "DELETE",
+      "path": "/users/{id}",
+      "success": [
+        {
+          "name": "Remove user",
+          "params": {
+            "id": "{{createdUserId}}"
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "User deleted"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paginated Users Query",
+      "method": "GET",
+      "path": "/users",
+      "success": [
+        {
+          "name": "Fetch first page of users",
+          "query": {
+            "page": 1,
+            "limit": 5
+          },
+          "expect": {
+            "status": 200,
+            "bodyContains": "users"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Product with Dynamic UUID",
+      "method": "POST",
+      "path": "/products",
+      "success": [
+        {
+          "name": "Create product with random UUID",
+          "body": {
+            "productId": "{{$uuid}}",
+            "name": "Widget {{$randomInt}}",
+            "price": 49.99
+          },
+          "expect": {
+            "status": 201,
+            "bodyContains": "created"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import * as http from 'http';
 import * as https from 'https';
+import * as path from 'path';
 import { URL } from 'url';
 import {
   RCaseDocument,
@@ -12,6 +13,9 @@ import {
 import { buildUrl } from './template';
 import { redactHeaders, sanitizePreview } from './redaction';
 import { evaluateAssertions } from './assertions';
+import { resolveBuiltinVariables, resolveObjectVariables } from './variables';
+import { loadEnvironment, resolveEnvVariables, resolveEnvInObject } from './environment';
+import { evaluateCapture } from './capture';
 
 export class TestExecutor {
   private aborted = false;
@@ -28,6 +32,11 @@ export class TestExecutor {
     this.aborted = false;
     const suiteStartTime = Date.now();
     const results: ExecutedTestCase[] = [];
+
+    // Persistent capture store across sequential test case executions within the suite
+    const captureStore: Record<string, string> = { ...(options.captureStore || {}) };
+    const workspacePath = options.workspacePath || (filePath ? path.dirname(filePath) : undefined);
+    const envVars = loadEnvironment(workspacePath, options.env);
 
     // Flatten all test cases across all endpoints, applying filters if specified
     const tasks: Array<{
@@ -96,7 +105,9 @@ export class TestExecutor {
         testCase,
         kind,
         caseId,
-        options
+        options,
+        envVars,
+        captureStore
       );
 
       results.push(executedResult);
@@ -130,12 +141,51 @@ export class TestExecutor {
     testCase: TestCaseDefinition,
     kind: 'success' | 'error',
     id: string,
-    options: ExecutionOptions = {}
+    options: ExecutionOptions = {},
+    contextEnv?: Record<string, string>,
+    captureStore?: Record<string, string>
   ): Promise<ExecutedTestCase> {
     const startTime = Date.now();
 
+    const env = contextEnv ?? loadEnvironment(options.workspacePath, options.env);
+    const activeCaptureStore = captureStore ?? options.captureStore;
+    const mergedEnv: Record<string, string> = {
+      ...env,
+      ...(activeCaptureStore || {})
+    };
+
+    // Resolve variables in baseUrl
+    const resolvedBaseUrl = resolveBuiltinVariables(resolveEnvVariables(baseUrl, mergedEnv));
+
+    // Resolve commonHeaders and endpoint.headers
+    const resolvedCommonHeaders = commonHeaders
+      ? (resolveObjectVariables(resolveEnvInObject(commonHeaders, mergedEnv)) as Record<string, string>)
+      : undefined;
+
+    const resolvedEndpointHeaders = endpoint.headers
+      ? (resolveObjectVariables(resolveEnvInObject(endpoint.headers, mergedEnv)) as Record<string, string>)
+      : undefined;
+
+    // Resolve testCase fields: params, query, headers, body
+    // Do NOT modify testCase.expect — assertions stay as-is
+    const resolvedParams = testCase.params
+      ? (resolveObjectVariables(resolveEnvInObject(testCase.params, mergedEnv)) as Record<string, string | number | boolean>)
+      : undefined;
+
+    const resolvedQuery = testCase.query
+      ? (resolveObjectVariables(resolveEnvInObject(testCase.query, mergedEnv)) as Record<string, string | number | boolean>)
+      : undefined;
+
+    const resolvedCaseHeaders = testCase.headers
+      ? (resolveObjectVariables(resolveEnvInObject(testCase.headers, mergedEnv)) as Record<string, string>)
+      : undefined;
+
+    const resolvedBody = testCase.body !== undefined && testCase.body !== null
+      ? resolveObjectVariables(resolveEnvInObject(testCase.body, mergedEnv))
+      : testCase.body;
+
     // 1. Resolve path template and construct full URL
-    const urlResult = buildUrl(baseUrl, endpoint.path, testCase.params, testCase.query);
+    const urlResult = buildUrl(resolvedBaseUrl, endpoint.path, resolvedParams, resolvedQuery);
     if (!urlResult.success || !urlResult.url) {
       return {
         id,
@@ -143,7 +193,7 @@ export class TestExecutor {
         caseName: testCase.name,
         caseKind: kind,
         method: endpoint.method,
-        url: `${baseUrl}${endpoint.path}`,
+        url: `${resolvedBaseUrl}${endpoint.path}`,
         redactedHeaders: {},
         status: 'ERROR',
         durationMs: Date.now() - startTime,
@@ -157,17 +207,17 @@ export class TestExecutor {
 
     // 2. Merge headers: file-level < endpoint-level < case-level
     const mergedHeaders: Record<string, string> = {
-      ...(commonHeaders || {}),
-      ...(endpoint.headers || {}),
-      ...(testCase.headers || {})
+      ...(resolvedCommonHeaders || {}),
+      ...(resolvedEndpointHeaders || {}),
+      ...(resolvedCaseHeaders || {})
     };
 
     let serializedBody: string | undefined;
-    if (testCase.body !== undefined && testCase.body !== null) {
-      if (typeof testCase.body === 'string') {
-        serializedBody = testCase.body;
+    if (resolvedBody !== undefined && resolvedBody !== null) {
+      if (typeof resolvedBody === 'string') {
+        serializedBody = resolvedBody;
       } else {
-        serializedBody = JSON.stringify(testCase.body);
+        serializedBody = JSON.stringify(resolvedBody);
         if (!Object.keys(mergedHeaders).some(k => k.toLowerCase() === 'content-type')) {
           mergedHeaders['Content-Type'] = 'application/json';
         }
@@ -196,7 +246,19 @@ export class TestExecutor {
 
       const durationMs = Date.now() - startTime;
 
-      // 4. Evaluate assertions
+      // 4. Response Variable Chaining (Token Capture)
+      let capturedThisCase: Record<string, string> | undefined;
+      if (testCase.capture && typeof testCase.capture === 'object') {
+        const extracted = evaluateCapture(testCase.capture, response.body);
+        if (Object.keys(extracted).length > 0) {
+          capturedThisCase = extracted;
+          if (activeCaptureStore) {
+            Object.assign(activeCaptureStore, extracted);
+          }
+        }
+      }
+
+      // 5. Evaluate assertions
       const assertionOutcome = evaluateAssertions(
         testCase.expect,
         response.statusCode,
@@ -213,13 +275,14 @@ export class TestExecutor {
         method: endpoint.method,
         url: targetUrl,
         redactedHeaders: safeHeaders,
-        requestBody: testCase.body,
+        requestBody: resolvedBody,
         status: assertionOutcome.passed ? 'PASS' : 'FAIL',
         actualStatus: response.statusCode,
         actualHeaders: response.headers,
         actualBody: sanitizePreview(response.body),
         durationMs,
         assertions: assertionOutcome.assertions,
+        captured: capturedThisCase,
         timestamp: Date.now()
       };
     } catch (err: unknown) {
@@ -234,7 +297,7 @@ export class TestExecutor {
         method: endpoint.method,
         url: targetUrl,
         redactedHeaders: safeHeaders,
-        requestBody: testCase.body,
+        requestBody: resolvedBody,
         status: 'ERROR',
         durationMs,
         assertions: [],

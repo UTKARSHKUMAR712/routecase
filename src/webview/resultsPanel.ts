@@ -185,6 +185,12 @@ export class RouteCaseResultsPanel {
             <pre>${escapeHtml(r.error)}</pre>
           </div>` : ''}
 
+          ${r.captured && Object.keys(r.captured).length > 0 ? `
+          <div class="section-title">📋 Captured Variables</div>
+          <div class="captured-variables" style="padding: 6px 12px; background: var(--vscode-editor-inactiveSelectionBackground); border-radius: 4px; font-family: monospace;">
+            ${Object.entries(r.captured).map(([k, v]) => `<div><strong>${escapeHtml(k)}</strong> = <code>${escapeHtml(v)}</code></div>`).join('')}
+          </div>` : ''}
+
           <div class="section-title">Assertions</div>
           <div class="assertions-container">
             ${assertionsList.length > 0 ? assertionsList : '<div class="muted">No assertions configured</div>'}

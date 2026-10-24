@@ -15,6 +15,7 @@ export interface TestCaseDefinition {
   query?: Record<string, string | number | boolean>;
   headers?: Record<string, string>;
   body?: unknown;
+  capture?: Record<string, string>;
   expect: TestCaseExpectation;
 }
 
@@ -60,6 +61,7 @@ export interface ExecutedTestCase {
   actualBody?: string;
   durationMs: number;
   assertions: AssertionResult[];
+  captured?: Record<string, string>;
   error?: string;
   timestamp: number;
 }
@@ -86,6 +88,9 @@ export interface ExecutionOptions {
   followRedirects?: boolean;
   signal?: AbortSignal;
   filter?: ExecutionFilter;
+  workspacePath?: string;
+  env?: Record<string, string>;
+  captureStore?: Record<string, string>;
   onCaseStart?: (testCase: { id: string; endpointName: string; caseName: string }) => void;
   onCaseComplete?: (result: ExecutedTestCase) => void;
 }

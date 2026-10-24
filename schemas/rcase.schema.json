@@ -3,7 +3,10 @@
   "title": "RouteCase API Test Definition",
   "description": "Schema for RouteCase (.rcase) API endpoint test definitions",
   "type": "object",
-  "required": ["baseUrl", "tests"],
+  "required": [
+    "baseUrl",
+    "tests"
+  ],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -16,8 +19,7 @@
     },
     "baseUrl": {
       "type": "string",
-      "description": "Base URL of the API server (e.g. http://localhost:3000)",
-      "format": "uri"
+      "description": "Base URL of the API server (e.g. http://localhost:3000 or {{API_BASE_URL}})"
     },
     "headers": {
       "type": "object",
@@ -37,7 +39,11 @@
   "definitions": {
     "EndpointDefinition": {
       "type": "object",
-      "required": ["name", "method", "path"],
+      "required": [
+        "name",
+        "method",
+        "path"
+      ],
       "additionalProperties": false,
       "properties": {
         "name": {
@@ -46,7 +52,15 @@
         },
         "method": {
           "type": "string",
-          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "HEAD",
+            "OPTIONS"
+          ],
           "description": "HTTP request method"
         },
         "path": {
@@ -78,7 +92,10 @@
     },
     "TestCase": {
       "type": "object",
-      "required": ["name", "expect"],
+      "required": [
+        "name",
+        "expect"
+      ],
       "additionalProperties": false,
       "properties": {
         "name": {
@@ -93,14 +110,22 @@
           "type": "object",
           "description": "Substitutions for path template variables, e.g. { \"name\": \"Batman\" }",
           "additionalProperties": {
-            "type": ["string", "number", "boolean"]
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
           }
         },
         "query": {
           "type": "object",
           "description": "Query string parameters appended to the URL",
           "additionalProperties": {
-            "type": ["string", "number", "boolean"]
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
           }
         },
         "headers": {
@@ -112,11 +137,20 @@
         },
         "body": {
           "description": "Request body for POST/PUT/PATCH requests (JSON object, array, or string)",
-          "type": ["object", "array", "string", "number", "boolean", "null"]
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
         },
         "expect": {
           "type": "object",
-          "required": ["status"],
+          "required": [
+            "status"
+          ],
           "additionalProperties": false,
           "properties": {
             "status": {
@@ -144,6 +178,13 @@
               "minimum": 1,
               "description": "Maximum allowed response time in milliseconds"
             }
+          }
+        },
+        "capture": {
+          "type": "object",
+          "description": "Extract values from the response body to use in later test cases",
+          "additionalProperties": {
+            "type": "string"
           }
         }
       }

@@ -1,0 +1,12 @@
+{
+  "name": "routecase-test-server",
+  "version": "1.0.0",
+  "description": "Express test server for RouteCase VS Code extension testing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

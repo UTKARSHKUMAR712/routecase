@@ -5,6 +5,15 @@ All notable changes to the **RouteCase** extension will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-10-24
+
+### Added
+- **Dynamic Built-in Variables**: Added support for dynamic variables `{{$uuid}}`, `{{$timestamp}}`, `{{$isoDate}}`, `{{$randomEmail}}`, `{{$randomInt}}`, and `{{$randomName}}` across `params`, `query`, `body`, and `headers` without mutating assertions.
+- **"Copy as cURL" Command**: Added context menu command `routecase.copyAsCurl` to quickly generate and copy formatted cURL commands for any test case under or closest to the cursor.
+- **Environment Variables & .env Support**: Added support for `{{VAR_NAME}}` variable substitution loaded from workspace `.rcase.env`, `.rcase.env.json`, and the `routecase.env` VS Code setting. Added demo template `examples/env-demo.rcase`.
+- **Response Variable Chaining (Token Capture)**: Added `capture` directive to extract values from JSON response bodies via dot-notation and inject them into subsequent test cases. Displayed captured variables in the webview results panel.
+- **OpenAPI / Swagger Importer**: Added `routecase.importOpenAPI` command to convert OpenAPI 3.x and Swagger 2.x specs (from file or URL) into complete `.rcase` suites with starter success and error test cases.
+
 ## [0.1.1] - 2026-10-24
 
 ### Added

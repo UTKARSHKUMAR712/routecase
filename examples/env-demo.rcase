@@ -1,0 +1,59 @@
+{
+  "$schema": "../schemas/rcase.schema.json",
+  "name": "Environment Variables Demo",
+  "baseUrl": "{{API_BASE_URL}}",
+  "headers": {
+    "x-api-key": "{{API_KEY}}"
+  },
+  "tests": [
+    {
+      "name": "Get User Profile",
+      "method": "GET",
+      "path": "/users/{id}",
+      "success": [
+        {
+          "name": "Fetch Admin User",
+          "params": {
+            "id": "{{ADMIN_USER_ID}}"
+          },
+          "expect": {
+            "status": 200
+          }
+        }
+      ],
+      "errors": [
+        {
+          "name": "Missing Authentication",
+          "headers": {
+            "x-api-key": ""
+          },
+          "params": {
+            "id": "1"
+          },
+          "expect": {
+            "status": 401
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Test User",
+      "method": "POST",
+      "path": "/users",
+      "success": [
+        {
+          "name": "Register Dynamic User",
+          "body": {
+            "id": "{{$uuid}}",
+            "name": "{{$randomName}}",
+            "email": "{{$randomEmail}}",
+            "createdAt": "{{$isoDate}}"
+          },
+          "expect": {
+            "status": 201
+          }
+        }
+      ]
+    }
+  ]
+}

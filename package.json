@@ -2,7 +2,7 @@
   "name": "routecase",
   "displayName": "RouteCase — API Route & Endpoint Tester",
   "description": "Define API endpoints once and run multiple input cases against them directly inside VS Code.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "UtkarshKumar",
   "license": "MIT",
   "repository": {
@@ -130,6 +130,18 @@
         "title": "Rerun Test Case",
         "category": "RouteCase",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "routecase.copyAsCurl",
+        "title": "Copy as cURL",
+        "category": "RouteCase",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "routecase.importOpenAPI",
+        "title": "Import OpenAPI / Swagger Spec",
+        "category": "RouteCase",
+        "icon": "$(cloud-download)"
       }
     ],
     "menus": {
@@ -168,6 +180,13 @@
           "when": "view == routecase.resultsView && viewItem == testCase",
           "group": "inline"
         }
+      ],
+      "editor/context": [
+        {
+          "command": "routecase.copyAsCurl",
+          "when": "resourceExtname == .rcase || resourceExtname == .routecase",
+          "group": "RouteCase@1"
+        }
       ]
     },
     "configuration": {
@@ -187,6 +206,11 @@
           "type": "boolean",
           "default": false,
           "description": "Whether to automatically follow HTTP redirects (false by default for safety)."
+        },
+        "routecase.env": {
+          "type": "object",
+          "default": {},
+          "description": "Key-value pairs for environment variable substitution in .rcase test files."
         }
       }
     }
