@@ -6,7 +6,9 @@
 
 # RouteCase — API Route & Endpoint Tester for VS Code
 
-[![Visual Studio Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/)
+[![Visual Studio Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase)
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/UtkarshKumar.routecase)](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase)
+[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/UtkarshKumar.routecase)](https://marketplace.visualstudio.com/items?itemName=UtkarshKumar.routecase)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **RouteCase** is a modern, lightweight Visual Studio Code extension designed for developers who build and test HTTP APIs. 
